@@ -33,3 +33,8 @@ main {
 aside {
     background-color: lightgoldenrodyellow;
 }
+
+#canvas {
+    height: 600px;
+    width: 450px;
+}

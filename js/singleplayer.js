@@ -3,6 +3,7 @@
 let fruitGroup = [];
 const movement = 10;
 let movementSpeed = 300;
+let movePiece = null;
 const gameOver = false;
 
 class Fruit {
@@ -48,7 +49,9 @@ function createFruitGroup(x, y, n) {
 
 function drawFruitGroup() {
     //reset spped to normal
+    clearInterval(movePiece);
     movementSpeed = 300;
+    movePiece = setInterval(moveFruitGroup, movementSpeed);
     //for now they'll always start in the middle above the canvas and always be groups of 3
     const startX = canvas.width / 2;
     const startY = -25;
@@ -132,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     //on start and when the previous fruit group hits
     drawFruitGroup();
     //COME BACK TO THIS
-    setInterval(moveFruitGroup, movementSpeed);
+    movePiece = setInterval(moveFruitGroup, movementSpeed);
     //move pieces
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
@@ -148,9 +151,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 fruit.move(dX);
             }
         } else if (e.key === ' ') {
-            //speed up
-            //RESET THIS WHEN NEXT PIECE IS DRAWN
-            movementSpeed = 60;
+            //speed up on press NOT HOLD
+            //Reset when new piece is drawn
+            clearInterval(movePiece);
+            movementSpeed = 100;
+            movePiece = setInterval(moveFruitGroup, movementSpeed);
 
         } else if (e.key === 'ArrowDown') {
             //CW

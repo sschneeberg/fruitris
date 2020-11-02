@@ -1,3 +1,12 @@
+//Set up Canvas
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const computedStyle = getComputedStyle(canvas);
+const height = computedStyle.height;
+const width = computedStyle.width;
+canvas.setAttribute('height', height);
+canvas.setAttribute('width', width);
+
 //create objects and rule sets
 
 let fruitGroup = [];
@@ -5,18 +14,21 @@ const movement = 10;
 let movementSpeed = 300;
 let movePiece = null;
 const gameOver = false;
+//adjust this when the board fills up, for now just the bottom of the canvas
+let baseline = canvas.height;
 
 class Fruit {
     constructor(x, y, color) {
-        //all fruit have radius 23 (take up a 50x50 square with some padding) and sAngle 0, eAngle 2Pi
+        //all fruit have radius 25 (take up a 50x50 square with some padding) and sAngle 0, eAngle 2Pi
         //all fruit start vertical
         this.x = x;
         this.y = y;
         this.color = color;
-        this.r = 23;
+        this.r = 25;
         this.sAngle = 0;
         this.eAngle = 2 * Math.PI;
         this.orientation = 'vertical';
+        this.mobile = true;
     }
 
     render() {
@@ -26,9 +38,33 @@ class Fruit {
         ctx.fill();
     }
 
+    //move side to side with arrow keys
     move(dX) {
         this.x = this.x + dX;
-        //check for boundaries
+    }
+
+    //check if hits x boundaries
+    //return true if piece can move, return false if piece will go over the edge
+    checkBoundaries(dX) {
+        let outsideL = this.x - this.r + dX;
+        let outsideR = this.x + this.r + dX;
+        if (outsideL < 0 || outsideR > canvas.width) {
+            //currently at the edge, cannot go further
+            return false;
+        } else {
+            return true;
+        }
+
+    }
+
+    checkHit() {
+        let bottom = this.y + this.r + movement;
+        if (bottom > baseline) {
+            this.mobile = false;
+            return false;
+        } else {
+            return true;
+        }
     }
 }
 
@@ -51,7 +87,7 @@ function drawFruitGroup() {
     //reset spped to normal
     clearInterval(movePiece);
     movementSpeed = 300;
-    movePiece = setInterval(moveFruitGroup, movementSpeed);
+    movePiece = setInterval(dropFruitGroup, movementSpeed);
     //for now they'll always start in the middle above the canvas and always be groups of 3
     const startX = canvas.width / 2;
     const startY = -25;
@@ -63,9 +99,32 @@ function drawFruitGroup() {
     }
 }
 
-function moveFruitGroup() {
+function dropFruitGroup() {
+    //if everything can move
+    if (checkBottom()) {
+        //drop pieces
+        for (fruit of fruitGroup) {
+            fruit.y = fruit.y + movement;
+        }
+    }
+
+}
+
+function checkBottom() {
     for (fruit of fruitGroup) {
-        fruit.y = fruit.y + movement;
+        if (!fruit.checkHit()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+function moveFruitGroup(dX) {
+    if (fruitGroup[0].checkBoundaries(dX) && fruitGroup[2].checkBoundaries(dX)) {
+        for (fruit of fruitGroup) {
+            fruit.move(dX);
+        }
     }
 }
 
@@ -119,15 +178,6 @@ function rePaint() {
     }
 }
 
-//Set up Canvas
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-
-const computedStyle = getComputedStyle(canvas);
-const height = computedStyle.height;
-const width = computedStyle.width;
-canvas.setAttribute('height', height);
-canvas.setAttribute('width', width);
 
 
 //React to player input
@@ -135,28 +185,23 @@ document.addEventListener('DOMContentLoaded', function() {
     //on start and when the previous fruit group hits
     drawFruitGroup();
     //COME BACK TO THIS
-    movePiece = setInterval(moveFruitGroup, movementSpeed);
+    movePiece = setInterval(dropFruitGroup, movementSpeed);
     //move pieces
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
             //left
-            let dX = -25;
-            for (fruit of fruitGroup) {
-                fruit.move(dX);
-            }
+            let dX = -50;
+            moveFruitGroup(dX);
         } else if (e.key === 'ArrowRight') {
             //right
-            let dX = 25;
-            for (fruit of fruitGroup) {
-                fruit.move(dX);
-            }
+            let dX = 50;
+            moveFruitGroup(dX);
         } else if (e.key === ' ') {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
             movementSpeed = 100;
-            movePiece = setInterval(moveFruitGroup, movementSpeed);
-
+            movePiece = setInterval(dropFruitGroup, movementSpeed);
         } else if (e.key === 'ArrowDown') {
             //CW
             let rot = 'CW';

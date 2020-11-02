@@ -8,19 +8,18 @@ canvas.setAttribute('height', height);
 canvas.setAttribute('width', width);
 
 //create objects and rule sets
-
+//canvas has 12 rows and 6 columns
+let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 const movement = 10;
 let movementSpeed = 300;
 let movePiece = null;
 const gameOver = false;
-//adjust this when the board fills up, for now just the bottom of the canvas
-let baseline = canvas.height;
 
 class Fruit {
     constructor(x, y, color) {
         //all fruit have radius 25 (take up a 50x50 square with some padding) and sAngle 0, eAngle 2Pi
-        //all fruit start vertical
+        //all fruit start vertical in center column: j = 4
         this.x = x;
         this.y = y;
         this.color = color;
@@ -28,7 +27,10 @@ class Fruit {
         this.sAngle = 0;
         this.eAngle = 2 * Math.PI;
         this.orientation = 'vertical';
-        this.mobile = true;
+        this.col = 4;
+        this.row = 0;
+        //what can it fall to before stopping?
+        this.baseline = canvas.height;
     }
 
     render() {
@@ -41,6 +43,11 @@ class Fruit {
     //move side to side with arrow keys
     move(dX) {
         this.x = this.x + dX;
+        if (dX < 0) {
+            this.col = this.col - 1;
+        } else if (dX > 0) {
+            this.col = this.col + 1;
+        }
     }
 
     //check if hits x boundaries
@@ -59,8 +66,7 @@ class Fruit {
 
     checkHit() {
         let bottom = this.y + this.r + movement;
-        if (bottom > baseline) {
-            this.mobile = false;
+        if (bottom > fruit.baseline) {
             return false;
         } else {
             return true;
@@ -70,6 +76,7 @@ class Fruit {
 
 
 function createFruitGroup(x, y, n) {
+    console.log('new');
     let colors = ['red', 'green', 'blue', 'yellow']
     while (n > 0) {
         let index = Math.floor(Math.random() * colors.length);
@@ -106,12 +113,17 @@ function dropFruitGroup() {
         for (fruit of fruitGroup) {
             fruit.y = fruit.y + movement;
         }
+    } else {
+        //add to board and create a new peice
+        addFruitGroup();
+        drawFruitGroup();
     }
 
 }
 
 function checkBottom() {
     for (fruit of fruitGroup) {
+        getBaseline(fruit);
         if (!fruit.checkHit()) {
             return false;
         }
@@ -119,6 +131,34 @@ function checkBottom() {
     return true;
 }
 
+function getBaseline(fruit) {
+    let j = fruit.col;
+    //start at the greatest possible
+    fruit.baseline = canvas.height;
+    /*
+    for (i = (board.length - 1); i > 0; i--) {
+        if (board[i][j] === 0) {
+            //if nothing is found
+            break;
+            //this is the top of the stack
+        } else {
+            //raise baseline by one circle/one row
+            fruit.baseline = fruit.baseline - (2 * this.r);
+        }
+    }
+    */
+
+}
+
+function addFruitGroup() {
+    for (fruit of fruitGroup) {
+        //store color in board at correct location
+        let i = Math.floor(fruit.y / (2 * fruit.r));
+        fruit.row = i;
+        let j = fruit.col;
+        board[i][j] = fruit;
+    }
+}
 
 function moveFruitGroup(dX) {
     if (fruitGroup[0].checkBoundaries(dX) && fruitGroup[2].checkBoundaries(dX)) {
@@ -175,10 +215,15 @@ function rePaint() {
         for (fruit of fruitGroup) {
             fruit.render();
         }
+        for (i = 0; i < board.length; i++) {
+            for (j = 0; j < board[i].length; j++) {
+                if (board[i][j] != 0) {
+                    board[i][j].render();
+                }
+            }
+        }
     }
 }
-
-
 
 //React to player input
 document.addEventListener('DOMContentLoaded', function() {
@@ -190,11 +235,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
             //left
-            let dX = -50;
+            let dX = -(2 * fruit.r);
             moveFruitGroup(dX);
         } else if (e.key === 'ArrowRight') {
             //right
-            let dX = 50;
+            let dX = 2 * fruit.r;
             moveFruitGroup(dX);
         } else if (e.key === ' ') {
             //speed up on press NOT HOLD

@@ -31,10 +31,41 @@ main {
 }
 
 aside {
-    background-color: lightgoldenrodyellow;
+    background-color: whitesmoke;
 }
 
 #canvas {
     height: 600px;
     width: 450px;
+}
+
+#right {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+#left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+button {
+    width: 10vh;
+    padding: 0.5rem;
+    background-color: cornflowerblue;
+    border: 2px solid cornsilk;
+    color: cornsilk;
+    margin: 3px;
+}
+
+#menu {
+    margin-bottom: 2rem;
+}
+
+.show {
+    visibility: visible;
 }

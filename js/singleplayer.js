@@ -76,7 +76,6 @@ class Fruit {
 
 
 function createFruitGroup(x, y, n) {
-    console.log('new');
     let colors = ['red', 'green', 'blue', 'yellow']
     while (n > 0) {
         let index = Math.floor(Math.random() * colors.length);
@@ -87,7 +86,6 @@ function createFruitGroup(x, y, n) {
         y = y - 50;
         n = n - 1;
     }
-    return fruitGroup;
 }
 
 function drawFruitGroup() {
@@ -100,7 +98,8 @@ function drawFruitGroup() {
     const startY = -25;
     const n = 3;
     //make new fruit group
-    fruitGroup = createFruitGroup(startX, startY, n);
+    fruitGroup = [];
+    createFruitGroup(startX, startY, n);
     for (fruit of fruitGroup) {
         fruit.render();
     }

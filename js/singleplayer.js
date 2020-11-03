@@ -27,8 +27,6 @@ class Fruit {
         this.sAngle = 0;
         this.eAngle = 2 * Math.PI;
         this.orientation = 'vertical';
-        this.col = 4;
-        this.row = 0;
         //what can it fall to before stopping?
         this.baseline = canvas.height;
     }
@@ -43,11 +41,6 @@ class Fruit {
     //move side to side with arrow keys
     move(dX) {
         this.x = this.x + dX;
-        if (dX < 0) {
-            this.col = this.col - 1;
-        } else if (dX > 0) {
-            this.col = this.col + 1;
-        }
     }
 
     //check if hits x boundaries
@@ -61,7 +54,6 @@ class Fruit {
         } else {
             return true;
         }
-
     }
 
     checkHit() {
@@ -74,13 +66,12 @@ class Fruit {
     }
 }
 
-
+//create the fruit objects
 function createFruitGroup(x, y, n) {
     let colors = ['red', 'green', 'blue', 'yellow']
     while (n > 0) {
         let index = Math.floor(Math.random() * colors.length);
         let color = colors[index];
-
         const fruit = new Fruit(x, y, color);
         fruitGroup.push(fruit);
         y = y - 50;
@@ -88,12 +79,14 @@ function createFruitGroup(x, y, n) {
     }
 }
 
+//reset a new piece to fall from the top, draw on canvas
 function drawFruitGroup() {
     //reset spped to normal
     clearInterval(movePiece);
     movementSpeed = 300;
     movePiece = setInterval(dropFruitGroup, movementSpeed);
-    //for now they'll always start in the middle above the canvas and always be groups of 3
+    //for now always start in the middle above the canvas and 
+    //always be groups of 3
     const startX = canvas.width / 2;
     const startY = -25;
     const n = 3;
@@ -105,6 +98,7 @@ function drawFruitGroup() {
     }
 }
 
+//move piece down on time interval until hits fall limit
 function dropFruitGroup() {
     //if everything can move
     if (checkBottom()) {
@@ -120,6 +114,7 @@ function dropFruitGroup() {
 
 }
 
+//check if we hit the fall limit
 function checkBottom() {
     for (fruit of fruitGroup) {
         getBaseline(fruit);
@@ -130,8 +125,10 @@ function checkBottom() {
     return true;
 }
 
+//find the fall limit: 
+//farthest a fruit can fall before the bottom or the top fruit
 function getBaseline(fruit) {
-    let j = fruit.col;
+    //let j = fruit.col;
     //start at the greatest possible
     fruit.baseline = canvas.height;
     /*
@@ -149,16 +146,17 @@ function getBaseline(fruit) {
 
 }
 
+//commit pieces to the board once they hit the bottom or the top layer of fruit
 function addFruitGroup() {
     for (fruit of fruitGroup) {
         //store color in board at correct location
         let i = Math.floor(fruit.y / (2 * fruit.r));
-        fruit.row = i;
-        let j = fruit.col;
+        let j = Math.floor(fruit.x / (2 * fruit.r));
         board[i][j] = fruit;
     }
 }
 
+//move group of three side to side, runs on user key press
 function moveFruitGroup(dX) {
     if (fruitGroup[0].checkBoundaries(dX) && fruitGroup[2].checkBoundaries(dX)) {
         for (fruit of fruitGroup) {
@@ -167,6 +165,7 @@ function moveFruitGroup(dX) {
     }
 }
 
+//rotate group of three fruit CW or CCW, runs on user key press
 function rotateFruitGroup(direction) {
     //get center piece coordinates
     let [x1, y1] = [fruitGroup[0].x, fruitGroup[0].y]
@@ -194,18 +193,39 @@ function rotateFruitGroup(direction) {
         [x3, y3] = [y3, x3];
     }
     //reset to full value
-    fruitGroup[0].x = x1 + x2;
-    fruitGroup[0].y = y1 + y2;
-    fruitGroup[2].x = x3 + x2;
-    fruitGroup[2].y = y3 + y2;
-    //change orientation to current
-    if (orientation === 'vertical') {
-        fruitGroup[1].orientation = 'horizontal';
-    } else {
-        fruitGroup[1].orientation = 'vertical';
+    let [x1new, y1new] = [x1 + x2, y1 + y2];
+    let [x3new, y3new] = [x3 + x2, y3 + y2];
+    if (checkRot(x1new, y1new, x3new, y3new, fruitGroup[0].r)) {
+        //set values
+        [fruitGroup[0].x, fruitGroup[0].y] = [x1new, y1new];
+        [fruitGroup[2].x, fruitGroup[2].y] = [x3new, y3new];
+        //change orientation to current
+        if (orientation === 'vertical') {
+            fruitGroup[1].orientation = 'horizontal';
+        } else {
+            fruitGroup[1].orientation = 'vertical';
+        }
     }
 }
 
+//make sure we can't rotate piece off the board
+function checkRot(x1, y1, x3, y3, r) {
+    //return true if piece can rotate, return false otherwise
+    if (y1 + r > canvas.height || y3 + r > canvas.height) {
+        //beyond bottom can't rotate here
+        return false;
+    } else if (x1 - r < 0 || x1 + r > canvas.width) {
+        //fruitGroup[0] off the edge
+        return false;
+    } else if (x3 - r < 0 || x3 + r > canvas.width) {
+        //fruitGroup[2] off the edge
+        return false;
+    } else {
+        return true;
+    }
+}
+
+//gameloop function
 function rePaint() {
     if (!gameOver) {
         //clear canvas

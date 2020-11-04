@@ -13,8 +13,28 @@ let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 const movement = 10;
 let movementSpeed = 300;
+let gravitySpeed = 200;
 let movePiece = null;
-const gameOver = false;
+let gameOver = false;
+let piecePts = 50;
+
+class Player {
+    constructor(number) {
+        this.number = number
+        this.name = `Player ${this.number}`;
+        this.score = 0;
+        this.turn = false;
+        this.active = false;
+    }
+
+    incScore(pts) {
+        this.score = this.score + pts;
+        document.getElementById('score').innerText = this.score;
+    }
+}
+
+let player1 = new Player(1);
+let player2 = new Player(2);
 
 class Fruit {
     constructor(x, y, color) {
@@ -159,21 +179,19 @@ function addFruitGroup() {
         board[i][j] = fruit;
     }
     checkClear();
-    fruitFall();
 }
 
-//institute gravity: if the spot below is empty, drop the fruit
-/*async*/
+//institute gravity: if the spot is empty, drop the fruit
+//MYSTERY BUG: async 
 function fruitFall() {
-    count = 0;
-    console.log(board);
+    //count = 0;
     for (i = 1; i < board.length; i++) {
         for (j = 0; j < board[0].length; j++) {
-            //if there is a above, but the spot is empty
-            console.log(i, j);
+            //if there is a fruit above, but the current spot is empty
             if (board[i][j] === 0 && board[i - 1][j] !== 0) {
-                count = count + 1;
+                //count = count + 1;
                 //move the fruit to the current row and update is position
+                //THIS CAUSED A MYSTERY BUG: add delay to look more like falling
                 //await delay(300);
                 board[i][j] = board[i - 1][j];
                 board[i][j].y = board[i][j].y + (2 * board[i][j].r);
@@ -183,15 +201,18 @@ function fruitFall() {
             } //otherwise do nothing, the fruit stays put
         }
     }
+    /* No longer need recursion now that gravity runs constantly
     if (count != 0) {
         //if something moved, go back and make sure nothing else has to move
         fruitFall();
-    }
+    } */
 }
 
+/*
+//CAUSED A MYSTERY BUG: appending a tenth element to a row full of undefined
 const delay = (ms) => new Promise(resolve => {
     setTimeout(resolve, ms);
-})
+}) */
 
 //check if you have three in a row and remove them 
 function checkClear() {
@@ -231,12 +252,19 @@ function checkHorizMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough, clear fruit and return true
-        for (coord of matchedFruit) {
-            let x = coord[0];
-            let y = coord[1];
-            board[x][y] = 0;
-        }
-        return true;
+        setTimeout(function() {
+            for (coord of matchedFruit) {
+                let x = coord[0];
+                let y = coord[1];
+                board[x][y] = 0;
+                if (player1.turn === true) {
+                    player1.incScore(piecePts);
+                } else if (player2.active === true && player2.turn === true) {
+                    player2.incScore(piecePts);
+                }
+            }
+            return true;
+        }, gravitySpeed);
     } else { //other wise don't 
         return false;
     }
@@ -267,12 +295,19 @@ function checkVertMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough matches, clear surrounding fruit and return true
-        for (coord of matchedFruit) {
-            let x = coord[0];
-            let y = coord[1];
-            board[x][y] = 0;
-        }
-        return true;
+        setTimeout(function() {
+            for (coord of matchedFruit) {
+                let x = coord[0];
+                let y = coord[1];
+                board[x][y] = 0;
+                if (player1.turn === true) {
+                    player1.incScore(piecePts);
+                } else if (player2.active === true && player2.turn === true) {
+                    player2.incScore(piecePts);
+                }
+            }
+            return true;
+        }, gravitySpeed);
     } else {
         return false;
     }
@@ -349,8 +384,7 @@ function checkRot(x1, y1, x3, y3, r) {
 
 //gameloop function
 function rePaint() {
-    if (!gameOver) {
-        //clear canvas
+    if (!gameOver) { //clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         //re render
         for (fruit of fruitGroup) {
@@ -369,8 +403,15 @@ function rePaint() {
 //React to player input
 document.addEventListener('DOMContentLoaded', function() {
     //on start and when the previous fruit group hits
+    //GET USER INPUT FOR PLAYER NAME
+    //player1.name = document.getElementById('player1').value
+    player1.turn = true;
+    player1.active = true;
+    document.getElementById('player').innerText = player1.name;
+    document.getElementById('score').innerText = player1.score;
     drawFruitGroup();
     movePiece = setInterval(dropFruitGroup, movementSpeed);
+    gravity = setInterval(fruitFall, gravitySpeed);
     //move pieces
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
@@ -385,8 +426,8 @@ document.addEventListener('DOMContentLoaded', function() {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
-            movementSpeed = 100;
-            movePiece = setInterval(dropFruitGroup, movementSpeed);
+            movementSpeed = 80;
+            movePiece = setInterval(dropFruitGroup, movementSpeed / 2);
         } else if (e.key === 'ArrowDown') {
             //CW
             let rot = 'CW';
@@ -398,7 +439,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         }
     })
-
 })
 
 setInterval(rePaint, 80);

@@ -9,18 +9,19 @@ header {
     border: 2px solid lightpink;
 }
 
+.player-info {
+    display: flex;
+    justify-content: space-between;
+}
+
 #title {
     text-align: center;
     margin-top: 0.5em;
 }
 
-#player {
+h4 {
     margin-left: 1em;
     margin-right: 1em;
-}
-
-#score {
-    float: right;
 }
 
 main {

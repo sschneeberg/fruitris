@@ -13,7 +13,7 @@ let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 const movement = 10;
 let movementSpeed = 300;
-let gravitySpeed = 200;
+let gravitySpeed = 150;
 let movePiece = null;
 let gameOver = false;
 let piecePts = 50;
@@ -30,6 +30,9 @@ class Player {
     incScore(pts) {
         this.score = this.score + pts;
         document.getElementById('score').innerText = this.score;
+        if (this.score > 5000) {
+            alert(`${this.name} wins!`)
+        }
     }
 }
 
@@ -179,6 +182,7 @@ function addFruitGroup() {
         board[i][j] = fruit;
     }
     checkClear();
+    checkEndCondition();
 }
 
 //institute gravity: if the spot is empty, drop the fruit
@@ -382,6 +386,17 @@ function checkRot(x1, y1, x3, y3, r) {
     }
 }
 
+function checkEndCondition() {
+    for (fruit of fruitGroup) {
+
+        if ((fruit.y - fruit.r) === 0) {
+            console.log(board);
+            console.log(fruit.y + fruit.r)
+            alert('you lose!')
+        }
+    }
+}
+
 //gameloop function
 function rePaint() {
     if (!gameOver) { //clear canvas
@@ -426,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
-            movementSpeed = 80;
+            movementSpeed = 150;
             movePiece = setInterval(dropFruitGroup, movementSpeed / 2);
         } else if (e.key === 'ArrowDown') {
             //CW

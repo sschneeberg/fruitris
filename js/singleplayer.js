@@ -8,7 +8,7 @@ canvas.setAttribute('height', height);
 canvas.setAttribute('width', width);
 
 //create objects and rule sets
-//canvas has 12 rows and 6 columns
+//canvas has 12 rows and 9 columns
 let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 const movement = 10;
@@ -68,7 +68,7 @@ class Fruit {
 
 //create the fruit objects
 function createFruitGroup(x, y, n) {
-    let colors = ['red', 'green', 'blue', 'yellow']
+    let colors = ['red', 'green', 'blue', 'yellow'];
     while (n > 0) {
         let index = Math.floor(Math.random() * colors.length);
         let color = colors[index];
@@ -145,57 +145,79 @@ function getBaseline(fruit) {
     }
 }
 
-//commit pieces to the board once they hit the bottom or the top layer of fruit
+//add pieces to the board once they hit the bottom or the top layer of fruit
 function addFruitGroup() {
     for (fruit of fruitGroup) {
         //store color in board at correct location
         let i = Math.floor(fruit.y / (2 * fruit.r));
         let j = Math.floor(fruit.x / (2 * fruit.r));
         board[i][j] = fruit;
-        checkClear(i, j, fruit);
+    }
+    checkClear();
+    fruitFall();
+}
+
+//institute gravity: if the spot below is empty, drop the fruit
+function fruitFall() {
+    count = 0;
+    for (i = 1; i < board.length; i++) {
+        for (j = 0; j < board[0].length; j++) {
+            //if there is a above, but the spot is empty
+            if (board[i][j] === 0 && board[i - 1][j] !== 0) {
+                count = count + 1;
+                //move the fruit to the current row and update is position
+                board[i][j] = board[i - 1][j];
+                board[i][j].y = board[i][j].y + (2 * board[i][j].r);
+                board[i - 1][j] = 0;
+                checkHorizMatch(i, j, board[i][j]);
+                checkVertMatch(i, j, board[i][j]);
+            } //otherwise do nothing, the fruit stays put
+        }
+    }
+    if (count != 0) {
+        //if something moved, go back and make sure nothing else has to move
+        fruitFall();
     }
 }
 
 //check if you have three in a row and remove them 
-function checkClear(i, j, fruit) {
-    if (checkHorizMatch(i, j, fruit) || checkVertMatch(i, j, fruit)) {
-        //wait to remove current fruit b/c needed in both checks
-        board[i][j] = 0;
-        console.log(board);
+function checkClear() {
+    for (fruit of fruitGroup) {
+        let i = Math.floor(fruit.y / (2 * fruit.r));
+        let j = Math.floor(fruit.x / (2 * fruit.r));
+        if (board[i][j] !== 0) {
+            //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
+            checkHorizMatch(i, j, fruit);
+            checkVertMatch(i, j, fruit);
+        }
     }
-
 }
 
 //check for horizontal matches from current fruit
 function checkHorizMatch(i, j, fruit) {
-    let matchedFruit = [];
+    let matchedFruit = [
+        [i, j]
+    ];
     //check for matches moving left from current fruit
-    for (n = j - 1; n > 0; n--) {
-        console.log(i, n);
+    for (n = j - 1; n > -1; n--) {
         if (board[i][n] !== 0 && board[i][n].color === fruit.color) {
             matchedFruit.push([i, n]);
-            console.log('logged')
         } else {
             //if the next one to the left doesn't match stop checking
-            console.log('broke')
             break;
         }
     }
     //check for matches moving right from current fruit
     for (n = j + 1; n < board[i].length; n++) {
-        console.log(i, n);
         if (board[i][n] !== 0 && board[i][n].color === fruit.color) {
-            console.log('logged')
             matchedFruit.push([i, n]);
         } else {
-            console.log('broke')
-                //if the next one to the right doesn't match stop checking
+            //if the next one to the right doesn't match stop checking
             break;
         }
     }
     //matches must be at least 3
-    //minus the current fruit means a list of at least 2
-    if (matchedFruit.length >= 2) {
+    if (matchedFruit.length >= 3) {
         //if enough, clear fruit and return true
         for (coord of matchedFruit) {
             let x = coord[0];
@@ -209,9 +231,11 @@ function checkHorizMatch(i, j, fruit) {
 }
 //check for vertical matches from current fruit
 function checkVertMatch(i, j, fruit) {
-    let matchedFruit = [];
+    let matchedFruit = [
+        [i, j]
+    ];
     //check for matches moving up from current fruit
-    for (n = i - 1; n > 0; n--) {
+    for (n = i - 1; n > -1; n--) {
         if (board[n][j] !== 0 && board[n][j].color === fruit.color) {
             matchedFruit.push([n, j]);
         } else {
@@ -229,7 +253,7 @@ function checkVertMatch(i, j, fruit) {
         }
     }
     //matches must be at least 3
-    if (matchedFruit.length >= 2) {
+    if (matchedFruit.length >= 3) {
         //if enough matches, clear surrounding fruit and return true
         for (coord of matchedFruit) {
             let x = coord[0];

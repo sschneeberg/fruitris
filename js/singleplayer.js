@@ -128,22 +128,21 @@ function checkBottom() {
 //find the fall limit: 
 //farthest a fruit can fall before the bottom or the top fruit
 function getBaseline(fruit) {
-    //let j = fruit.col;
-    //start at the greatest possible
-    fruit.baseline = canvas.height;
-    /*
-    for (i = (board.length - 1); i > 0; i--) {
-        if (board[i][j] === 0) {
-            //if nothing is found
-            break;
-            //this is the top of the stack
-        } else {
-            //raise baseline by one circle/one row
-            fruit.baseline = fruit.baseline - (2 * this.r);
+    let j = Math.floor(fruit.x / (2 * fruit.r));
+    let count = 0;
+    if (j > 0 && j < board[0].length) {
+        for (i = (board.length - 1); i > 0; i--) {
+            if (board[i][j] === 0) {
+                //if nothing is found
+                break;
+                //this is the top of the stack
+            } else {
+                //raise baseline by one circle/one row
+                count = count + 1;
+            }
         }
+        fruit.baseline = canvas.height - (count * (2 * fruit.r));
     }
-    */
-
 }
 
 //commit pieces to the board once they hit the bottom or the top layer of fruit

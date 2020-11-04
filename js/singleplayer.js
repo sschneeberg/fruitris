@@ -64,6 +64,12 @@ class Fruit {
             return true;
         }
     }
+
+    getCell() {
+        let i = Math.floor(this.y / (2 * this.r));
+        let j = Math.floor(this.x / (2 * this.r));
+        return [i, j]
+    }
 }
 
 //create the fruit objects
@@ -149,8 +155,7 @@ function getBaseline(fruit) {
 function addFruitGroup() {
     for (fruit of fruitGroup) {
         //store color in board at correct location
-        let i = Math.floor(fruit.y / (2 * fruit.r));
-        let j = Math.floor(fruit.x / (2 * fruit.r));
+        let [i, j] = fruit.getCell();
         board[i][j] = fruit;
     }
     checkClear();
@@ -158,14 +163,18 @@ function addFruitGroup() {
 }
 
 //institute gravity: if the spot below is empty, drop the fruit
+/*async*/
 function fruitFall() {
     count = 0;
+    console.log(board);
     for (i = 1; i < board.length; i++) {
         for (j = 0; j < board[0].length; j++) {
             //if there is a above, but the spot is empty
+            console.log(i, j);
             if (board[i][j] === 0 && board[i - 1][j] !== 0) {
                 count = count + 1;
                 //move the fruit to the current row and update is position
+                //await delay(300);
                 board[i][j] = board[i - 1][j];
                 board[i][j].y = board[i][j].y + (2 * board[i][j].r);
                 board[i - 1][j] = 0;
@@ -180,11 +189,14 @@ function fruitFall() {
     }
 }
 
+const delay = (ms) => new Promise(resolve => {
+    setTimeout(resolve, ms);
+})
+
 //check if you have three in a row and remove them 
 function checkClear() {
     for (fruit of fruitGroup) {
-        let i = Math.floor(fruit.y / (2 * fruit.r));
-        let j = Math.floor(fruit.x / (2 * fruit.r));
+        let [i, j] = fruit.getCell();
         if (board[i][j] !== 0) {
             //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
             checkHorizMatch(i, j, fruit);
@@ -358,7 +370,6 @@ function rePaint() {
 document.addEventListener('DOMContentLoaded', function() {
     //on start and when the previous fruit group hits
     drawFruitGroup();
-    //COME BACK TO THIS
     movePiece = setInterval(dropFruitGroup, movementSpeed);
     //move pieces
     document.addEventListener('keydown', function(e) {

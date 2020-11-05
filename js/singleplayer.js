@@ -29,6 +29,8 @@ let gameOver = false;
 let piecePts = 50;
 let gameState = 'active';
 let gameMode = 1;
+let countDown = 30000;
+let startTime = 0;
 
 class Player {
     constructor(number) {
@@ -235,6 +237,61 @@ function addFruitGroup() {
     }
     checkClear();
     checkEndCondition();
+    checkChangeTurns();
+}
+
+function checkChangeTurns() {
+    //change turns if in two player mode and interval has passed
+    if (gameMode === 2) {
+        if (Date.now() - startTime >= countDown) {
+            clearInterval(movePiece);
+            console.log(movePiece);
+            console.log(3);
+            player1.turn = !player1.turn;
+            player2.turn = !player2.turn;
+            if (player1.turn) {
+                document.getElementById('turnChanger').style.opacity = 1;
+                document.getElementById('player').innerText = player1.name;
+                document.getElementById('score').innerText = player1.score;
+                setTimeout(function() {
+                    document.getElementById('turnDisp').innerText = `${player1.name}'s Turn`;
+                    document.getElementById('countDown').innerText = '3';
+                }, 500)
+                setTimeout(function() {
+                    document.getElementById('countDown').innerText = '2';
+                }, 1000);
+                setTimeout(function() {
+                    document.getElementById('countDown').innerText = '1';
+                    document.getElementById('turnChanger').style.opacity = 0;;
+                }, 1500);
+                setTimeout(function() {
+                    startTime = Date.now();
+                    movementSpeed = 300;
+                    movePiece = setInterval(dropFruitGroup, movementSpeed);
+                }, 2000);
+            } else if (player2.turn) {
+                document.getElementById('turnChanger').style.opacity = 1;
+                document.getElementById('player').innerText = player2.name;
+                document.getElementById('score').innerText = player2.score;
+                setTimeout(function() {
+                    document.getElementById('turnDisp').innerText = `${player2.name}'s Turn`;
+                    document.getElementById('countDown').innerText = '3';
+                }, 500)
+                setTimeout(function() {
+                    document.getElementById('countDown').innerText = '2';
+                }, 1000);
+                setTimeout(function() {
+                    document.getElementById('countDown').innerText = '1';
+                    document.getElementById('turnChanger').style.opacity = 0;;
+                }, 1500);
+                setTimeout(function() {
+                    startTime = Date.now();
+                    movementSpeed = 300;
+                    movePiece = setInterval(dropFruitGroup, movementSpeed);
+                }, 2000);
+            }
+        }
+    }
 }
 
 //institute gravity: if the spot is empty, drop the fruit
@@ -448,6 +505,13 @@ function checkEndCondition() {
         if ((fruit.y - fruit.r) <= 0) {
             gameOver = true;
             clearInterval(movePiece)
+            if (gameMode === 2) {
+                if (player1.turn) {
+                    player2.won = true;
+                } else if (player2.turn) {
+                    player1.won = true;
+                }
+            }
         }
     }
 }
@@ -460,7 +524,6 @@ function pauseGame(e) {
     } else if (gameState === 'paused') {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
-        clearInterval(movePiece);
         movementSpeed = 300;
         movePiece = setInterval(dropFruitGroup, movementSpeed);
     }
@@ -469,7 +532,6 @@ function pauseGame(e) {
 function resetGame(e) {
     if (e.target.id == 'restart') {
         document.getElementById('endScreen').classList.toggle('hide');
-        document.querySelector('.player-info').classList.toggle('hide');
         board = Array(12).fill().map(() => Array(9).fill(0));
         player1.clrScore();
         player2.clrScore();
@@ -482,9 +544,9 @@ function resetGame(e) {
 }
 
 function toggleButtons() {
-    document.getElementById('pause').classList.toggle('hide');
     if (gameMode === 1) {
         document.getElementById('reset').classList.toggle('hide');
+        document.getElementById('pause').classList.toggle('hide');
     }
     document.getElementById('menu').classList.toggle('hide');
     //toggle next up screen too
@@ -507,9 +569,12 @@ function startGame() {
         setTimeout(function() {
             document.getElementById('score').innerText = player1.score;
         }, 1500);
+    } else {
+        document.getElementById('score').innerText = player1.score;
     }
     document.querySelector('.player-info').classList.toggle('hide');
     document.getElementById('player').innerText = player1.name;
+    startTime = Date.now();
     drawFruitGroup();
     gravity = setInterval(fruitFall, gravitySpeed);
 }
@@ -531,6 +596,7 @@ function mainMenu(e) {
 
 //gameloop function
 function rePaint() {
+    console.log(movePiece);
     if (!gameOver) { //clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
@@ -550,7 +616,7 @@ function rePaint() {
                 }
             }
         }
-    } else if (gameOver && gameState === 'active') {
+    } else if (gameOver && gameState === 'active') { //display end screen
         //clear intervals
         gameState = 'deactive';
         if (player1.won) {
@@ -566,8 +632,8 @@ function rePaint() {
             document.getElementById('winner').innerText = `YOU LOST: ${player1.score} PTS`;
         }
         document.getElementById('endScreen').classList.toggle('hide');
+        document.querySelector('.player-info').classList.toggle('hide');
         toggleButtons();
-        clearInterval(movePiece);
     }
 }
 

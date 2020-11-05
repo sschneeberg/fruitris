@@ -91,6 +91,16 @@ label {
     margin-left: 6em;
 }
 
+#turnChanger {
+    position: absolute;
+    top: 45%;
+    right: 50%;
+    transform: translate(50%, 0);
+    transition: opacity 500ms ease;
+    -moz-transition: opacity 500ms ease;
+    -webkit-transition: opacity 500ms ease;
+}
+
 #right {
     display: flex;
     flex-direction: column;

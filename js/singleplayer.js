@@ -1,4 +1,4 @@
-//Set up Canvas
+//Set up Canvases
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const computedStyle = getComputedStyle(canvas);
@@ -7,10 +7,20 @@ const width = computedStyle.width;
 canvas.setAttribute('height', height);
 canvas.setAttribute('width', width);
 
+const nextUp = document.getElementById('next');
+const ctxNext = nextUp.getContext('2d');
+const computedStyleNext = getComputedStyle(nextUp);
+const nextHeight = computedStyleNext.height;
+const nextWidth = computedStyleNext.width;
+nextUp.setAttribute('height', nextHeight);
+nextUp.setAttribute('width', nextWidth);
+
+
 //create objects and rule sets
 //canvas has 12 rows and 9 columns
 let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
+let nextFruitGroup = null;
 const movement = 10;
 let movementSpeed = 300;
 let gravitySpeed = 150;
@@ -71,6 +81,13 @@ class Fruit {
         ctx.fill();
     }
 
+    renderNext() {
+        ctxNext.fillStyle = this.color;
+        ctxNext.beginPath();
+        ctxNext.arc((next.width / 2), (this.y + nextUp.height - this.r), this.r, this.sAngle, this.eAngle);
+        ctxNext.fill();
+    }
+
     //move side to side with arrow keys
     move(dX) {
         this.x = this.x + dX;
@@ -122,7 +139,7 @@ function createFruitGroup(x, y, n) {
         let index = Math.floor(Math.random() * colors.length);
         let color = colors[index];
         const fruit = new Fruit(x, y, color);
-        fruitGroup.push(fruit);
+        nextFruitGroup.push(fruit);
         y = y - 50;
         n = n - 1;
     }
@@ -140,10 +157,22 @@ function drawFruitGroup() {
     const startY = -25;
     const n = 3;
     //make new fruit group
+    if (nextFruitGroup === null) {
+        //first turn, make a next fruit group to start
+        nextFruitGroup = [];
+        createFruitGroup(startX, startY, n);
+    }
+    //set the current fruit group to the next one
     fruitGroup = [];
+    fruitGroup = nextFruitGroup;
+    nextFruitGroup = [];
+    //get a new next one
     createFruitGroup(startX, startY, n);
     for (fruit of fruitGroup) {
         fruit.render();
+    }
+    for (fruit of nextFruitGroup) {
+        fruit.renderNext()
     }
 }
 
@@ -416,7 +445,7 @@ function checkRot(x1, y1, x3, y3, r) {
 
 function checkEndCondition() {
     for (fruit of fruitGroup) {
-        if ((fruit.y - fruit.r) < 0) {
+        if ((fruit.y - fruit.r) <= 0) {
             gameOver = true;
             clearInterval(movePiece)
         }
@@ -458,6 +487,9 @@ function toggleButtons() {
         document.getElementById('reset').classList.toggle('hide');
     }
     document.getElementById('menu').classList.toggle('hide');
+    //toggle next up screen too
+    document.getElementById('next').classList.toggle('hide');
+    document.getElementById('next-up').classList.toggle('hide');
 }
 
 function startGame() {
@@ -483,7 +515,6 @@ function mainMenu(e) {
     if (e.target.id === 'rechoose') {
         document.getElementById('endScreen').classList.toggle('hide');
     }
-    toggleButtons();
     //turn things on
     document.getElementById('startScreen').classList.toggle('hide');
     document.querySelector('.player-info').classList.toggle('hide');
@@ -497,9 +528,15 @@ function mainMenu(e) {
 function rePaint() {
     if (!gameOver) { //clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
         //re render
         for (fruit of fruitGroup) {
             fruit.render();
+        }
+        if (nextFruitGroup !== null) {
+            for (fruit of nextFruitGroup) {
+                fruit.renderNext();
+            }
         }
         for (i = 0; i < board.length; i++) {
             for (j = 0; j < board[i].length; j++) {

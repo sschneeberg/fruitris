@@ -28,18 +28,19 @@ h4 {
 main {
     display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: 100px 450px 100px;
+    grid-template-columns: 200px 450px 200px;
     height: 600px;
 }
 
 aside {
     background-color: whitesmoke;
-    min-width: 100px;
+    width: 200px;
 }
 
 #canvas {
     height: 600px;
     width: 450px;
+    background-color: white;
 }
 
 .screen {
@@ -86,6 +87,16 @@ label {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+}
+
+#next {
+    height: 200px;
+    width: 100px;
+    background-color: white;
+}
+
+#next-up {
+    margin: 3.5em 3.5em 5px 0;
 }
 
 .modes {

@@ -10,11 +10,11 @@
 
 <body>
     <header>
-        <h1 id='title'>Fruitris</h2>
-            <div class="player-info hide">
-                <h4 id='player'>Player's Name</h4>
-                <h4 id='score'>Score</h4>
-            </div>
+        <h1 id='title'>Fruitris</h1>
+        <div class="player-info hide">
+            <h4 id='player'>Player's Name</h4>
+            <h4 id='score'>Score</h4>
+        </div>
     </header>
     <main>
         <aside id='left'>
@@ -43,7 +43,10 @@
         </form>
 
         <div class='screen hide' id="endScreen">
-            this starts hidden and gets triggered
+            <h2 id="winner"></h2>
+            <button type='button' class='hide' id='continue'>CONTINUE</button>
+            <button type='button' id='restart'>PLAY AGAIN</button>
+            <button type='button' id='rechoose'>CHANGE MODES</button>
         </div>
 
         <aside id='right'>

@@ -27,13 +27,16 @@ class Player {
         this.score = 0;
         this.turn = false;
         this.active = false;
+        this.won = false;
+        this.highScore = 5000;
     }
 
     incScore(pts) {
         this.score = this.score + pts;
         document.getElementById('score').innerText = this.score;
-        if (this.score > 5000) {
+        if (this.highScore !== null && this.score >= this.highScore) {
             gameOver = true;
+            this.won = true;
         }
     }
 
@@ -193,15 +196,16 @@ function getBaseline(fruit) {
 
 //add pieces to the board once they hit the bottom or the top layer of fruit
 function addFruitGroup() {
-    checkEndCondition();
     for (fruit of fruitGroup) {
         //store color in board at correct location
         let [i, j] = fruit.getCell();
         //fruit.y = fruit.baseline;
-        board[i][j] = fruit;
+        if (i >= 0 && j >= 0) {
+            board[i][j] = fruit;
+        }
     }
     checkClear();
-
+    checkEndCondition();
 }
 
 //institute gravity: if the spot is empty, drop the fruit
@@ -241,10 +245,12 @@ const delay = (ms) => new Promise(resolve => {
 function checkClear() {
     for (fruit of fruitGroup) {
         let [i, j] = fruit.getCell();
-        if (board[i][j] !== 0) {
-            //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
-            checkHorizMatch(i, j, fruit);
-            checkVertMatch(i, j, fruit);
+        if (i >= 0 && j >= 0) {
+            if (board[i][j] !== 0) {
+                //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
+                checkHorizMatch(i, j, fruit);
+                checkVertMatch(i, j, fruit);
+            }
         }
     }
 }
@@ -410,9 +416,9 @@ function checkRot(x1, y1, x3, y3, r) {
 
 function checkEndCondition() {
     for (fruit of fruitGroup) {
-        if ((fruit.y - fruit.r) <= 0) {
+        if ((fruit.y - fruit.r) < 0) {
             gameOver = true;
-            console.log('overflow');
+            clearInterval(movePiece)
         }
     }
 }
@@ -422,23 +428,69 @@ function pauseGame(e) {
         e.target.innerText = 'RESUME';
         gameState = 'paused';
         clearInterval(movePiece);
-        console.log('paused')
-        console.log(movePiece);
     } else if (gameState === 'paused') {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
-        console.log('resumed')
+        clearInterval(movePiece);
         movementSpeed = 300;
         movePiece = setInterval(dropFruitGroup, movementSpeed);
     }
 }
 
-function resetGame() {
-    if (gameMode === 1) {
+function resetGame(e) {
+    if (e.target.id == 'restart') {
+        document.getElementById('endScreen').classList.toggle('hide');
+        document.querySelector('.player-info').classList.toggle('hide');
+        board = Array(12).fill().map(() => Array(9).fill(0));
+        player1.clrScore();
+        player2.clrScore();
+        startGame();
+    } else if (gameMode === 1) {
         board = Array(12).fill().map(() => Array(9).fill(0));
         player1.clrScore();
         drawFruitGroup();
     }
+}
+
+function toggleButtons() {
+    document.getElementById('pause').classList.toggle('hide');
+    if (gameMode === 1) {
+        document.getElementById('reset').classList.toggle('hide');
+    }
+    document.getElementById('menu').classList.toggle('hide');
+}
+
+function startGame() {
+    toggleButtons();
+    gameOver = false;
+    gameState = 'active';
+    //COME BACK TO THIS WHEN IMPLEMENTING MODES
+    player1.name = document.getElementById('player1').value;
+    player1.turn = true;
+    if (player2.active === true) {
+        player2.name = document.getElementById('player2').value;
+    }
+    document.querySelector('.player-info').classList.toggle('hide');
+    document.getElementById('player').innerText = player1.name;
+    document.getElementById('score').innerText = player1.score;
+    drawFruitGroup();
+    gravity = setInterval(fruitFall, gravitySpeed);
+}
+
+//reset to start screen
+function mainMenu(e) {
+    //turn things off
+    if (e.target.id === 'rechoose') {
+        document.getElementById('endScreen').classList.toggle('hide');
+    }
+    toggleButtons();
+    //turn things on
+    document.getElementById('startScreen').classList.toggle('hide');
+    document.querySelector('.player-info').classList.toggle('hide');
+    gameOver = true;
+    gameState = 'deactive';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearInterval(movePiece);
 }
 
 //gameloop function
@@ -458,10 +510,22 @@ function rePaint() {
         }
     } else if (gameOver && gameState === 'active') {
         //clear intervals
-        console.log('game over');
         gameState = 'deactive';
+        if (player1.won) {
+            if (gameMode === 1) {
+                document.getElementById('winner').innerText = `WINNER: ${player1.score} pts`;
+                document.getElementById('continue').classList.toggle('hide');
+            } else {
+                document.getElementById('winner').innerText = `${player1.name} wins: ${player1.score} pts`;
+            }
+        } else if (player2.won) {
+            document.getElementById('winner').innerText = `${player2.name} wins: ${player2.score} PTS`;
+        } else {
+            document.getElementById('winner').innerText = `YOU LOST: ${player1.score} PTS`;
+        }
         document.getElementById('endScreen').classList.toggle('hide');
-        document.getElementById('pause').classList.toggle('hide');
+        toggleButtons();
+        clearInterval(movePiece);
     }
 }
 
@@ -486,36 +550,25 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         //buttons
     document.querySelector('form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        document.getElementById('playScreen').classList.toggle('hide');
-        document.getElementById('pause').classList.toggle('hide');
-        if (gameMode === 1) {
-            document.getElementById('reset').classList.toggle('hide');
-        }
-        document.getElementById('menu').classList.toggle('hide');
-        gameOver = false;
-        gameState = 'active';
-        //COME BACK TO THIS WHEN IMPLEMENTING MODES
-        player1.name = document.getElementById('player1').value;
-        player1.turn = true;
-        if (player2.active === true) {
-            player2.name = document.getElementById('player2').value;
-        }
-        document.querySelector('.player-info').classList.toggle('hide');
-        document.getElementById('player').innerText = player1.name;
-        document.getElementById('score').innerText = player1.score;
-        drawFruitGroup();
-        gravity = setInterval(fruitFall, gravitySpeed);
-    })
-
+            e.preventDefault();
+            document.getElementById('playScreen').classList.toggle('hide');
+            startGame();
+        })
+        //in game
     document.getElementById('pause').addEventListener('click', pauseGame);
-    document.getElementById('menu').addEventListener('click', function() {
-        document.getElementById('startScreen').classList.toggle('hide')
-        gameOver = true;
-        gameState = 'deactive';
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    })
+    document.getElementById('menu').addEventListener('click', mainMenu);
     document.getElementById('reset').addEventListener('click', resetGame);
+    //at end of game
+    document.getElementById('restart').addEventListener('click', resetGame);
+    document.getElementById('rechoose').addEventListener('click', mainMenu);
+    document.getElementById('continue').addEventListener('click', function() {
+        document.getElementById('endScreen').classList.toggle('hide');
+        toggleButtons();
+        gameState = 'active';
+        gameOver = false;
+        player1.highScore = null;
+        drawFruitGroup();
+    })
 
     //move pieces
     document.addEventListener('keydown', function(e) {
@@ -527,11 +580,11 @@ document.addEventListener('DOMContentLoaded', function() {
             //right
             let dX = 2 * fruit.r;
             moveFruitGroup(dX);
-        } else if (e.key === ' ') {
+        } else if (e.key === ' ' && gameState !== 'paused') {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
-            movementSpeed = 150;
+            movementSpeed = 80;
             movePiece = setInterval(dropFruitGroup, movementSpeed);
         } else if (e.key === 'ArrowDown') {
             //CW

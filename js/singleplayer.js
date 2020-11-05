@@ -193,6 +193,7 @@ function getBaseline(fruit) {
 
 //add pieces to the board once they hit the bottom or the top layer of fruit
 function addFruitGroup() {
+    checkEndCondition();
     for (fruit of fruitGroup) {
         //store color in board at correct location
         let [i, j] = fruit.getCell();
@@ -200,7 +201,7 @@ function addFruitGroup() {
         board[i][j] = fruit;
     }
     checkClear();
-    checkEndCondition();
+
 }
 
 //institute gravity: if the spot is empty, drop the fruit
@@ -409,9 +410,9 @@ function checkRot(x1, y1, x3, y3, r) {
 
 function checkEndCondition() {
     for (fruit of fruitGroup) {
-        if ((fruit.y - fruit.r) === 0) {
+        if ((fruit.y - fruit.r) <= 0) {
             gameOver = true;
-            gameState = 'deactive';
+            console.log('overflow');
         }
     }
 }
@@ -456,6 +457,9 @@ function rePaint() {
             }
         }
     } else if (gameOver && gameState === 'active') {
+        //clear intervals
+        console.log('game over');
+        gameState = 'deactive';
         document.getElementById('endScreen').classList.toggle('hide');
         document.getElementById('pause').classList.toggle('hide');
     }
@@ -491,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('menu').classList.toggle('hide');
         gameOver = false;
         gameState = 'active';
-        //COME BACK TOTHIS WHEN IMPLEMENTING MODES
+        //COME BACK TO THIS WHEN IMPLEMENTING MODES
         player1.name = document.getElementById('player1').value;
         player1.turn = true;
         if (player2.active === true) {
@@ -501,7 +505,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('player').innerText = player1.name;
         document.getElementById('score').innerText = player1.score;
         drawFruitGroup();
-        movePiece = setInterval(dropFruitGroup, movementSpeed);
         gravity = setInterval(fruitFall, gravitySpeed);
     })
 
@@ -529,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
             //Reset when new piece is drawn
             clearInterval(movePiece);
             movementSpeed = 150;
-            movePiece = setInterval(dropFruitGroup, movementSpeed / 2);
+            movePiece = setInterval(dropFruitGroup, movementSpeed);
         } else if (e.key === 'ArrowDown') {
             //CW
             let rot = 'CW';

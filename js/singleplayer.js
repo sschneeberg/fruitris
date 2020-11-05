@@ -580,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
             //right
             let dX = 2 * fruit.r;
             moveFruitGroup(dX);
-        } else if (e.key === ' ' && gameState !== 'paused') {
+        } else if (e.key === 'Shift' && gameState !== 'paused') {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);

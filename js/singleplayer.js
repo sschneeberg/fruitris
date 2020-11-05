@@ -17,6 +17,8 @@ let gravitySpeed = 150;
 let movePiece = null;
 let gameOver = false;
 let piecePts = 50;
+let gameState = 'active';
+let gameMode = 1;
 
 class Player {
     constructor(number) {
@@ -31,8 +33,13 @@ class Player {
         this.score = this.score + pts;
         document.getElementById('score').innerText = this.score;
         if (this.score > 5000) {
-            alert(`${this.name} wins!`)
+            gameOver = true;
         }
+    }
+
+    clrScore() {
+        this.score = 0;
+        document.getElementById('score').innerText = this.score;
     }
 }
 
@@ -66,19 +73,29 @@ class Fruit {
         this.x = this.x + dX;
     }
 
-    //check if hits x boundaries
+    //check if hits x boundaries or another piece
     //return true if piece can move, return false if piece will go over the edge
     checkBoundaries(dX) {
         let outsideL = this.x - this.r + dX;
         let outsideR = this.x + this.r + dX;
+        let newCenterX = this.x + dX;
+        let [i, j] = this.getCell(); //use built in b/c we have it
+        j = Math.floor(newCenterX / (2 * this.r)) //adjust j
         if (outsideL < 0 || outsideR > canvas.width) {
             //currently at the edge, cannot go further
             return false;
-        } else {
-            return true;
         }
+        if (i > 0) {
+            if (board[i][j] !== 0) {
+                //going to hit a stored piece
+                console.log(board[i][j]);
+                return false;
+            }
+        }
+        return true;
     }
 
+    //hits bottom/y limit
     checkHit() {
         let bottom = this.y + this.r + movement;
         if (bottom > fruit.baseline) {
@@ -87,6 +104,7 @@ class Fruit {
             return true;
         }
     }
+
 
     getCell() {
         let i = Math.floor(this.y / (2 * this.r));
@@ -179,6 +197,8 @@ function addFruitGroup() {
     for (fruit of fruitGroup) {
         //store color in board at correct location
         let [i, j] = fruit.getCell();
+        //fruit.y = fruit.baseline;
+        console.log(i, j);
         board[i][j] = fruit;
     }
     checkClear();
@@ -256,19 +276,19 @@ function checkHorizMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough, clear fruit and return true
-        setTimeout(function() {
-            for (coord of matchedFruit) {
-                let x = coord[0];
-                let y = coord[1];
-                board[x][y] = 0;
-                if (player1.turn === true) {
-                    player1.incScore(piecePts);
-                } else if (player2.active === true && player2.turn === true) {
-                    player2.incScore(piecePts);
-                }
+        console.log(matchedFruit);
+        for (coord of matchedFruit) {
+            let x = coord[0];
+            let y = coord[1];
+            board[x][y] = 0;
+            if (player1.turn === true) {
+                player1.incScore(piecePts);
+                console.log('+50');
+            } else if (player2.active === true && player2.turn === true) {
+                player2.incScore(piecePts);
             }
-            return true;
-        }, gravitySpeed);
+        }
+        return true;
     } else { //other wise don't 
         return false;
     }
@@ -299,19 +319,19 @@ function checkVertMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough matches, clear surrounding fruit and return true
-        setTimeout(function() {
-            for (coord of matchedFruit) {
-                let x = coord[0];
-                let y = coord[1];
-                board[x][y] = 0;
-                if (player1.turn === true) {
-                    player1.incScore(piecePts);
-                } else if (player2.active === true && player2.turn === true) {
-                    player2.incScore(piecePts);
-                }
+        console.log(matchedFruit);
+        for (coord of matchedFruit) {
+            let x = coord[0];
+            let y = coord[1];
+            board[x][y] = 0;
+            if (player1.turn === true) {
+                player1.incScore(piecePts);
+                console.log('+50');
+            } else if (player2.active === true && player2.turn === true) {
+                player2.incScore(piecePts);
             }
-            return true;
-        }, gravitySpeed);
+        }
+        return true;
     } else {
         return false;
     }
@@ -371,6 +391,10 @@ function rotateFruitGroup(direction) {
 
 //make sure we can't rotate piece off the board
 function checkRot(x1, y1, x3, y3, r) {
+    let i1 = Math.floor(y1 / (2 * r));
+    let j1 = Math.floor(x1 / (2 * r));
+    let i3 = Math.floor(y3 / (2 * r));
+    let j3 = Math.floor(x3 / (2 * r));
     //return true if piece can rotate, return false otherwise
     if (y1 + r > canvas.height || y3 + r > canvas.height) {
         //beyond bottom can't rotate here
@@ -381,6 +405,9 @@ function checkRot(x1, y1, x3, y3, r) {
     } else if (x3 - r < 0 || x3 + r > canvas.width) {
         //fruitGroup[2] off the edge
         return false;
+    } else if (board[i1][j1] !== 0 || board[i3][j3] !== 0) {
+        //going to hit another fruit
+        return false;
     } else {
         return true;
     }
@@ -388,12 +415,33 @@ function checkRot(x1, y1, x3, y3, r) {
 
 function checkEndCondition() {
     for (fruit of fruitGroup) {
-
         if ((fruit.y - fruit.r) === 0) {
-            console.log(board);
-            console.log(fruit.y + fruit.r)
-            alert('you lose!')
+            gameOver = true;
+            gameState = 'deactive';
         }
+    }
+}
+
+function pauseGame(e) {
+    if (gameState === 'active') {
+        e.target.innerText = 'RESUME';
+        gameState = 'paused';
+        clearInterval(movePiece);
+        console.log('paused')
+    } else if (gameState === 'paused') {
+        e.target.innerText = 'PAUSE';
+        gameState = 'active';
+        console.log('resumed')
+        movementSpeed = 300;
+        movePiece = setInterval(dropFruitGroup, movementSpeed);
+    }
+}
+
+function resetGame() {
+    if (gameMode === 1) {
+        board = Array(12).fill().map(() => Array(9).fill(0));
+        player1.clrScore();
+        drawFruitGroup();
     }
 }
 
@@ -412,21 +460,60 @@ function rePaint() {
                 }
             }
         }
+    } else if (gameOver) {
+        document.getElementById('endscreen').classList.toggle('hide');
+        document.getElementById('pause').classList.toggle('hide');
     }
 }
 
 //React to player input
 document.addEventListener('DOMContentLoaded', function() {
-    //on start and when the previous fruit group hits
-    //GET USER INPUT FOR PLAYER NAME
-    //player1.name = document.getElementById('player1').value
-    player1.turn = true;
-    player1.active = true;
-    document.getElementById('player').innerText = player1.name;
-    document.getElementById('score').innerText = player1.score;
-    drawFruitGroup();
-    movePiece = setInterval(dropFruitGroup, movementSpeed);
-    gravity = setInterval(fruitFall, gravitySpeed);
+    document.querySelectorAll('.modeBtn').forEach(function(e) {
+            e.addEventListener('click', function(e) {
+                document.getElementById('playScreen').classList.toggle('hide');
+                document.getElementById('startScreen').classList.toggle('hide');
+                //player1 will always be active, in both modes
+                player1.active = true;
+                player1.name = document.getElementById('player1').value;
+                console.log(player1.name);
+                if (e.target.id === 'double') {
+                    //show second player input
+                    document.querySelectorAll('.p2').forEach(function(e) {
+                            e.classList.toggle('hide');
+                        })
+                        //set game mode
+                    gameMode = 2;
+                    player2.active = true;
+                    player2.name = document.getElementById('player2').value
+                }
+            })
+        })
+        //buttons
+    document.getElementById('start').addEventListener('click', function() {
+        document.getElementById('playScreen').classList.toggle('hide');
+        document.getElementById('pause').classList.toggle('hide');
+        document.getElementById('reset').classList.toggle('hide');
+        document.getElementById('menu').classList.toggle('hide');
+        gameOver = false;
+        gameState = 'active';
+        //COME BACK TOTHIS WHEN IMPLEMENTING MODES
+        player1.turn = true;
+        document.querySelector('.player-info').classList.toggle('hide');
+        document.getElementById('player').innerText = player1.name;
+        document.getElementById('score').innerText = player1.score;
+        drawFruitGroup();
+        movePiece = setInterval(dropFruitGroup, movementSpeed);
+        gravity = setInterval(fruitFall, gravitySpeed);
+    })
+
+    document.getElementById('pause').addEventListener('click', pauseGame);
+    document.getElementById('menu').addEventListener('click', function() {
+        document.getElementById('startScreen').classList.toggle('hide')
+        gameOver = true;
+        gameState = 'deactive';
+    })
+    document.getElementById('reset').addEventListener('click', resetGame);
+
     //move pieces
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {

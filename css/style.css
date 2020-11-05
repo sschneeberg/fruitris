@@ -3,6 +3,7 @@ body {
     height: 70vh;
     margin: 0 auto;
     margin-top: 7vh;
+    position: relative;
 }
 
 header {
@@ -40,6 +41,20 @@ aside {
     width: 450px;
 }
 
+.screen {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, 0);
+    height: 300px;
+    width: 400px;
+    background: burlywood;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
 #right {
     display: flex;
     flex-direction: column;
@@ -52,6 +67,16 @@ aside {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+}
+
+.modes {
+    display: flex;
+    width: 300px;
+    justify-content: space-evenly;
+}
+
+.buttonBox {
+    text-align: center;
 }
 
 button {
@@ -67,6 +92,11 @@ button {
     margin-bottom: 2rem;
 }
 
-.show {
-    visibility: visible;
+#instructions,
+.modeBtn {
+    width: fit-content;
+}
+
+.hide {
+    visibility: hidden;
 }

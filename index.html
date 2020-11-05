@@ -11,7 +11,7 @@
 <body>
     <header>
         <h1 id='title'>Fruitris</h2>
-            <div class="player-info">
+            <div class="player-info hide">
                 <h4 id='player'>Player's Name</h4>
                 <h4 id='score'>Score</h4>
             </div>
@@ -23,10 +23,33 @@
 
         <canvas id="canvas"></canvas>
 
+        <div class='screen' id="startScreen">
+            <div class="buttonBox">
+                <h3>Select a Mode:</h3>
+                <div class="modes">
+                    <button type='button' class='modeBtn' id='single'>1 PLAYER</button>
+                    <button type='button' class='modeBtn' id='double'>2 PLAYER</button>
+                </div>
+            </div>
+            <button type='button' id='instructions'>INSTRUCTIONS</button>
+        </div>
+
+        <div class='screen hide' id="playScreen">
+            <label class='p1' for="player1">Player 1:</label>
+            <input class='p1' type="text" id="player1" placeholder="Name" name="">
+            <label class='p2 hide' for="player2">Player 2:</label>
+            <input class='p2 hide' type="text" id="player2" placeholder="Name" name="">
+            <button type='button' id='start'>START</button>
+        </div>
+
+        <div class='screen hide' id="endscreen">
+            this starts hidden and gets triggered
+        </div>
+
         <aside id='right'>
-            <button type="button" id='pause'>PAUSE</button>
-            <button type="button" id='reset'>RESET</button>
-            <button type="button" id='menu'>MENU</button>
+            <button type="button" class='hide' id='pause'>PAUSE</button>
+            <button type="button" class='hide' id='reset'>RESET</button>
+            <button type="button" class='hide' id='menu'>MENU</button>
         </aside>
 
     </main>

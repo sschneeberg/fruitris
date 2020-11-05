@@ -2,12 +2,14 @@ body {
     width: fit-content;
     height: 70vh;
     margin: 0 auto;
-    margin-top: 7vh;
+    margin-top: 4vh;
     position: relative;
 }
 
 header {
-    border: 2px solid lightpink;
+    background: lightblue;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
 }
 
 .player-info {
@@ -17,7 +19,8 @@ header {
 
 #title {
     text-align: center;
-    margin-top: 0.5em;
+    padding-top: 0.5em;
+    margin-top: 0;
 }
 
 h4 {
@@ -50,11 +53,24 @@ aside {
     transform: translate(50%, 0);
     height: 300px;
     width: 400px;
-    background: burlywood;
+    background: lightblue;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-radius: 6px;
+    ;
+}
+
+#difficulties {
+    position: absolute;
+    top: 45%;
+    right: 50%;
+    transform: translate(50%, 0);
+    display: flex;
+    width: fit-content;
+    height: fit-content;
+    justify-content: space-evenly;
 }
 
 #instructions {
@@ -80,6 +96,7 @@ label {
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
+    border-bottom-right-radius: 6px;
 }
 
 #left {
@@ -87,12 +104,14 @@ label {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    border-bottom-left-radius: 6px;
 }
 
 #next {
     height: 200px;
     width: 100px;
     background-color: white;
+    border-radius: 6px;
 }
 
 #next-up {
@@ -118,6 +137,12 @@ button {
     border: 2px solid cornsilk;
     color: cornsilk;
     margin: 3px;
+    border-radius: 4px;
+    ;
+}
+
+#difficulties button {
+    margin: 1rem;
 }
 
 #menu {

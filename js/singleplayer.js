@@ -502,9 +502,14 @@ function startGame() {
     if (player2.active === true) {
         player2.name = document.getElementById('player2').value;
     }
+    if (gameMode === 1) {
+        document.getElementById('score').innerText = `Score to beat: ${player1.highScore}`;
+        setTimeout(function() {
+            document.getElementById('score').innerText = player1.score;
+        }, 1500);
+    }
     document.querySelector('.player-info').classList.toggle('hide');
     document.getElementById('player').innerText = player1.name;
-    document.getElementById('score').innerText = player1.score;
     drawFruitGroup();
     gravity = setInterval(fruitFall, gravitySpeed);
 }
@@ -583,15 +588,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     gameMode = 2;
                     player2.active = true;
                 }
+                if (e.target.id === 'single') {
+                    document.getElementById('difficulties').classList.toggle('hide');
+                }
             })
         })
         //buttons
     document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            document.getElementById('playScreen').classList.toggle('hide');
-            startGame();
-        })
-        //in game
+        e.preventDefault();
+        document.getElementById('playScreen').classList.toggle('hide');
+        startGame();
+    })
+    document.querySelectorAll('.difficultyBtn').forEach(function(e) {
+        e.addEventListener('click', function(e) {
+            if (e.target.id === 'easy') {
+                player1.highScore = 5000;
+            } else if (e.target.id === 'medium') {
+                player1.highScore = 10000;
+            } else if (e.target.id === 'hard') {
+                player1.highScore = 15000;
+            }
+        });
+    });
+    //in game
     document.getElementById('pause').addEventListener('click', pauseGame);
     document.getElementById('menu').addEventListener('click', mainMenu);
     document.getElementById('reset').addEventListener('click', resetGame);

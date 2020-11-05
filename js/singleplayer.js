@@ -88,7 +88,6 @@ class Fruit {
         if (i > 0) {
             if (board[i][j] !== 0) {
                 //going to hit a stored piece
-                console.log(board[i][j]);
                 return false;
             }
         }
@@ -198,7 +197,6 @@ function addFruitGroup() {
         //store color in board at correct location
         let [i, j] = fruit.getCell();
         //fruit.y = fruit.baseline;
-        console.log(i, j);
         board[i][j] = fruit;
     }
     checkClear();
@@ -276,14 +274,12 @@ function checkHorizMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough, clear fruit and return true
-        console.log(matchedFruit);
         for (coord of matchedFruit) {
             let x = coord[0];
             let y = coord[1];
             board[x][y] = 0;
             if (player1.turn === true) {
                 player1.incScore(piecePts);
-                console.log('+50');
             } else if (player2.active === true && player2.turn === true) {
                 player2.incScore(piecePts);
             }
@@ -319,14 +315,12 @@ function checkVertMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough matches, clear surrounding fruit and return true
-        console.log(matchedFruit);
         for (coord of matchedFruit) {
             let x = coord[0];
             let y = coord[1];
             board[x][y] = 0;
             if (player1.turn === true) {
                 player1.incScore(piecePts);
-                console.log('+50');
             } else if (player2.active === true && player2.turn === true) {
                 player2.incScore(piecePts);
             }
@@ -428,6 +422,7 @@ function pauseGame(e) {
         gameState = 'paused';
         clearInterval(movePiece);
         console.log('paused')
+        console.log(movePiece);
     } else if (gameState === 'paused') {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
@@ -460,8 +455,8 @@ function rePaint() {
                 }
             }
         }
-    } else if (gameOver) {
-        document.getElementById('endscreen').classList.toggle('hide');
+    } else if (gameOver && gameState === 'active') {
+        document.getElementById('endScreen').classList.toggle('hide');
         document.getElementById('pause').classList.toggle('hide');
     }
 }
@@ -474,8 +469,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('startScreen').classList.toggle('hide');
                 //player1 will always be active, in both modes
                 player1.active = true;
-                player1.name = document.getElementById('player1').value;
-                console.log(player1.name);
                 if (e.target.id === 'double') {
                     //show second player input
                     document.querySelectorAll('.p2').forEach(function(e) {
@@ -484,20 +477,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         //set game mode
                     gameMode = 2;
                     player2.active = true;
-                    player2.name = document.getElementById('player2').value
                 }
             })
         })
         //buttons
-    document.getElementById('start').addEventListener('click', function() {
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
         document.getElementById('playScreen').classList.toggle('hide');
         document.getElementById('pause').classList.toggle('hide');
-        document.getElementById('reset').classList.toggle('hide');
+        if (gameMode === 1) {
+            document.getElementById('reset').classList.toggle('hide');
+        }
         document.getElementById('menu').classList.toggle('hide');
         gameOver = false;
         gameState = 'active';
         //COME BACK TOTHIS WHEN IMPLEMENTING MODES
+        player1.name = document.getElementById('player1').value;
         player1.turn = true;
+        if (player2.active === true) {
+            player2.name = document.getElementById('player2').value;
+        }
         document.querySelector('.player-info').classList.toggle('hide');
         document.getElementById('player').innerText = player1.name;
         document.getElementById('score').innerText = player1.score;
@@ -511,6 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('startScreen').classList.toggle('hide')
         gameOver = true;
         gameState = 'deactive';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     })
     document.getElementById('reset').addEventListener('click', resetGame);
 

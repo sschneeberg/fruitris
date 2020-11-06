@@ -4,10 +4,11 @@ body {
     margin: 0 auto;
     margin-top: 4vh;
     position: relative;
+    color: cornsilk;
 }
 
 header {
-    background: lightblue;
+    background: rgba(16, 253, 87, 0.712);
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
@@ -36,14 +37,14 @@ main {
 }
 
 aside {
-    background-color: whitesmoke;
+    background-color: rgba(59, 30, 3, 0.616);
     width: 200px;
 }
 
 #canvas {
     height: 600px;
     width: 450px;
-    background-color: white;
+    background-color: rgba(59, 30, 3, 0.795);
 }
 
 .screen {
@@ -53,7 +54,7 @@ aside {
     transform: translate(50%, 0);
     height: 300px;
     width: 400px;
-    background: lightblue;
+    background: rgba(16, 253, 87, 0.712);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -122,7 +123,7 @@ label {
 #powerUp {
     height: 200px;
     width: 100px;
-    background-color: white;
+    background-color: rgba(59, 30, 3, 0.795);
     border-radius: 6px;
 }
 
@@ -145,7 +146,7 @@ button {
     width: fit-content;
     min-width: 80px;
     padding: 0.5rem;
-    background-color: cornflowerblue;
+    background-color: rgb(9, 110, 55);
     border: 2px solid cornsilk;
     color: cornsilk;
     margin: 3px;

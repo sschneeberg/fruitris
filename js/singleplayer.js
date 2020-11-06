@@ -39,7 +39,16 @@ let gameState = 'active';
 let gameMode = 1;
 let countDown = 30000;
 let startTime = 0;
-//let TimingFcns = []; debugging variable
+//instatiate images
+let red = new Image();
+red.src = 'imgs/red.png';
+let blue = new Image();
+blue.src = 'imgs/blue.png';
+let yellow = new Image();
+yellow.src = 'imgs/yellow.png';
+let green = new Image();
+green.src = 'imgs/green.png';
+let imgs = [red, yellow, green, blue];
 
 class Player {
     constructor(number) {
@@ -116,20 +125,35 @@ class Fruit {
         this.orientation = 'vertical';
         //what can it fall to before stopping?
         this.baseline = canvas.height;
+        this.image = '';
     }
 
     render() {
+        //context.drawImage(img,x,y,width,height);
+        this.image = imgs[this.color - 1];
+        let x = this.x - this.r;
+        let y = this.y - this.r;
+        let dim = 60;
+        ctx.drawImage(this.image, x, y, dim, dim);
+        /* Circles for building functionality:
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.r, this.sAngle, this.eAngle);
         ctx.fill();
+        */
     }
 
     renderNext() {
+        this.image = imgs[this.color - 1];
+        let dim = 60;
+        let y = this.y + nextUp.height - (2 * dim / 2);
+        let x = (next.width / 2) - dim / 2;
+        ctxNext.drawImage(this.image, x, y, dim, dim);
+        /*
         ctxNext.fillStyle = this.color;
         ctxNext.beginPath();
         ctxNext.arc((next.width / 2), (this.y + nextUp.height - this.r), this.r, this.sAngle, this.eAngle);
-        ctxNext.fill();
+        ctxNext.fill(); */
     }
 
     //move side to side with arrow keys
@@ -178,7 +202,7 @@ class Fruit {
 
 //create the fruit objects
 function createFruitGroup(x, y, n) {
-    let colors = ['red', 'green', 'blue', 'yellow'];
+    let colors = [1, 2, 3, 4];
     while (n > 0) {
         let index = Math.floor(Math.random() * colors.length);
         let color = colors[index];

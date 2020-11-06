@@ -117,7 +117,8 @@ label {
     border-bottom-left-radius: 6px;
 }
 
-#next {
+#next,
+#powerUp {
     height: 200px;
     width: 100px;
     background-color: white;

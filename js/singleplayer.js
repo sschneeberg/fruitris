@@ -15,6 +15,14 @@ const nextWidth = computedStyleNext.width;
 nextUp.setAttribute('height', nextHeight);
 nextUp.setAttribute('width', nextWidth);
 
+const powerUpBox = document.getElementById('powerUp');
+const ctxPower = powerUpBox.getContext('2d');
+const computedStylePow = getComputedStyle(powerUpBox);
+const powHeight = computedStylePow.height;
+const powWidth = computedStylePow.width;
+powerUpBox.setAttribute('height', powHeight);
+powerUpBox.setAttribute('width', powWidth);
+
 
 //create objects and rule sets
 //canvas has 12 rows and 9 columns
@@ -42,11 +50,20 @@ class Player {
         this.active = false;
         this.won = false;
         this.highScore = 5000;
+        this.powerups = {
+            column: { number: 0, color: 'magenta', startY: 40 }, //clears column
+            row: { number: 0, color: 'cyan', startY: 100 }, //clears a row
+            all: { number: 0, color: 'orange', startY: 160 }, //clears all of one color
+        }
     }
 
     incScore(pts) {
         this.score = this.score + pts;
         document.getElementById('score').innerText = this.score;
+        if (gameMode === 2 && this.score % 500 === 0) {
+            //every 500 pts add a random powerup
+            this.addPowerUp();
+        }
         if (this.highScore !== null && this.score >= this.highScore) {
             gameOver = true;
             this.won = true;
@@ -56,6 +73,31 @@ class Player {
     clrScore() {
         this.score = 0;
         document.getElementById('score').innerText = this.score;
+    }
+
+    addPowerUp() {
+        let types = ['column', 'row', 'all']
+        let index = Math.floor(Math.random() * 3);
+        let type = types[index];
+        this.powerups[type].number = this.powerups[type].number + 1;
+    }
+
+    renderPowerUps() {
+        for (let type in this.powerups) {
+            //draw the symbol 
+            ctxPower.fillStyle = this.powerups[type].color;
+            ctxPower.beginPath();
+            ctxPower.arc(powerUpBox.width / 2, this.powerups[type].startY, 23, 0, 2 * Math.PI);
+            ctxPower.fill();
+            //add the count label
+            ctxPower.fillStyle = 'lightgrey';
+            ctxPower.beginPath();
+            ctxPower.arc(((powerUpBox.width / 2) - 15), this.powerups[type].startY - 15, 12, 0, 2 * Math.PI);
+            ctxPower.fill();
+            ctxPower.fillStyle = 'black';
+            ctxPower.font = "16px Arial";
+            ctxPower.fillText(this.powerups[type].number, ((powerUpBox.width / 2) - 20), this.powerups[type].startY - 10);
+        }
     }
 }
 
@@ -251,8 +293,6 @@ function checkChangeTurns() {
             player2.turn = !player2.turn;
             if (player1.turn) {
                 document.getElementById('turnChanger').style.opacity = 1;
-                document.getElementById('player').innerText = player1.name;
-                document.getElementById('score').innerText = player1.score;
                 setTimeout(function() {
                     document.getElementById('turnDisp').innerText = `${player1.name}'s Turn`;
                     document.getElementById('countDown').innerText = '3';
@@ -265,13 +305,14 @@ function checkChangeTurns() {
                     document.getElementById('turnChanger').style.opacity = 0;;
                 }, 1500);
                 setTimeout(function() {
+                    document.getElementById('player').innerText = player1.name;
+                    document.getElementById('score').innerText = player1.score;
+                    player1.renderPowerUps();
                     startTime = Date.now();
                     drawFruitGroup();
                 }, 2000);
             } else if (player2.turn) {
                 document.getElementById('turnChanger').style.opacity = 1;
-                document.getElementById('player').innerText = player2.name;
-                document.getElementById('score').innerText = player2.score;
                 setTimeout(function() {
                     document.getElementById('turnDisp').innerText = `${player2.name}'s Turn`;
                     document.getElementById('countDown').innerText = '3';
@@ -284,6 +325,9 @@ function checkChangeTurns() {
                     document.getElementById('turnChanger').style.opacity = 0;;
                 }, 1500);
                 setTimeout(function() {
+                    document.getElementById('player').innerText = player2.name;
+                    document.getElementById('score').innerText = player2.score;
+                    player2.renderPowerUps();
                     startTime = Date.now();
                     drawFruitGroup();
                 }, 2000);
@@ -382,6 +426,7 @@ function checkHorizMatch(i, j, fruit) {
         return false;
     }
 }
+
 //check for vertical matches from current fruit
 function checkVertMatch(i, j, fruit) {
     let matchedFruit = [
@@ -547,6 +592,8 @@ function toggleButtons() {
     if (gameMode === 1) {
         document.getElementById('reset').classList.toggle('hide');
         document.getElementById('pause').classList.toggle('hide');
+    } else if (gameMode === 2) {
+        document.getElementById('powerUp').classList.toggle('hide');
     }
     document.getElementById('menu').classList.toggle('hide');
     //toggle next up screen too
@@ -558,13 +605,17 @@ function startGame() {
     toggleButtons();
     gameOver = false;
     gameState = 'active';
-    //COME BACK TO THIS WHEN IMPLEMENTING MODES
     player1.name = document.getElementById('player1').value;
     player1.turn = true;
-    if (player2.active === true) {
+    if (gameMode === 2) { //turn off p2 menu items, turn on p2 game items
         player2.name = document.getElementById('player2').value;
+        document.querySelectorAll('.p2').forEach(function(e) {
+            e.classList.toggle('hide');
+        })
+        player1.renderPowerUps();
     }
-    if (gameMode === 1) {
+    if (gameMode === 1) { //turn off p1 menu items, turn on p1 game items
+        document.getElementById('difficulties').classList.toggle('hide');
         document.getElementById('score').innerText = `Score to beat: ${player1.highScore}`;
         setTimeout(function() {
             document.getElementById('score').innerText = player1.score;
@@ -572,6 +623,7 @@ function startGame() {
     } else {
         document.getElementById('score').innerText = player1.score;
     }
+    //show player into, start game
     document.querySelector('.player-info').classList.toggle('hide');
     document.getElementById('player').innerText = player1.name;
     startTime = Date.now();
@@ -585,6 +637,7 @@ function mainMenu(e) {
     if (e.target.id === 'rechoose') {
         document.getElementById('endScreen').classList.toggle('hide');
     }
+    toggleButtons();
     //turn things on
     document.getElementById('startScreen').classList.toggle('hide');
     document.querySelector('.player-info').classList.toggle('hide');
@@ -599,6 +652,14 @@ function rePaint() {
     if (!gameOver) { //clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
+        if (gameMode === 2) {
+            ctxPower.clearRect(0, 0, powerUpBox.width, powerUpBox.height);
+            if (player1.turn) {
+                player1.renderPowerUps();
+            } else if (player2.turn) {
+                player2.renderPowerUps();
+            }
+        }
         //re render
         for (fruit of fruitGroup) {
             fruit.render();
@@ -655,6 +716,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (e.target.id === 'single') {
                     document.getElementById('difficulties').classList.toggle('hide');
+                    gameMode = 1;
                 }
             })
         })

@@ -379,6 +379,7 @@ function checkClear() {
                 //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
                 checkHorizMatch(i, j, fruit);
                 checkVertMatch(i, j, fruit);
+                checkGrow(i, j, fruit);
             }
         }
     }
@@ -542,6 +543,37 @@ function checkRot(x1, y1, x3, y3, r) {
     } else {
         return true;
     }
+}
+
+//
+function checkGrow(i, j, fruit) {
+    //check the 4 grow patterns: groups of 4 in 2x2 where one is empty and three are fruit of the same color
+    if (i !== 0 && board[i - 1][j] === 0) {
+        if (board[i][j + 1] !== 0 && board[i - 1][j + 1] !== 0) {
+            if (board[i][j + 1].color === board[i - 1][j + 1].color && board[i - 1][j + 1].color === fruit.color) {
+                //pattern 1
+                return true;
+            }
+        } else if (board[i][j - 1] !== 0 && board[i - 1][j - 1] !== 0) {
+            if (board[i][j - 1].color === board[i - 1][j - 1].color && board[i - 1][j - 1].color === fruit.color) {
+                //pattern 2
+                return true;
+            }
+        }
+    } else if (i !== (board.length - 1) && board[i + 1][j] !== 0) {
+        if (board[i][j - 1] === 0 && board[i + 1][j - 1] !== 0) {
+            if (board[i + 1][j - 1].color === board[i + 1][j].color && board[i + 1][j].color === fruit.color) {
+                //pattern 3
+                return true;
+            }
+        } else if (board[i][j + 1] === 0 && board[i - 1][j - 1] !== 0) {
+            if (board[i - 1][j - 1].color === board[i + 1][j].color && board[i + 1][j].color === fruit.color) {
+                //pattern 4
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function checkEndCondition() {

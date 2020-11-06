@@ -379,7 +379,7 @@ function checkClear() {
                 //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
                 checkHorizMatch(i, j, fruit);
                 checkVertMatch(i, j, fruit);
-                checkGrow(i, j, fruit);
+                //checkGrow(i, j, fruit);
             }
         }
     }
@@ -545,7 +545,7 @@ function checkRot(x1, y1, x3, y3, r) {
     }
 }
 
-//
+//grow fruit IN PORGRESS
 function checkGrow(i, j, fruit) {
     //check the 4 grow patterns: groups of 4 in 2x2 where one is empty and three are fruit of the same color
     if (i !== 0 && board[i - 1][j] === 0) {

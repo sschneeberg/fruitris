@@ -47,12 +47,11 @@ class Player {
         this.name = `Player ${this.number}`;
         this.score = 0;
         this.turn = false;
-        this.active = false;
         this.won = false;
         this.highScore = 5000;
         this.powerups = {
-            column: { number: 0, color: 'magenta', startY: 40 }, //clears column
             row: { number: 0, color: 'cyan', startY: 100 }, //clears a row
+            column: { number: 0, color: 'magenta', startY: 40 }, //clears column
             all: { number: 0, color: 'orange', startY: 160 }, //clears all of one color
         }
     }
@@ -417,7 +416,7 @@ function checkHorizMatch(i, j, fruit) {
             board[x][y] = 0;
             if (player1.turn === true) {
                 player1.incScore(piecePts);
-            } else if (player2.active === true && player2.turn === true) {
+            } else if (gameMode === 2 && player2.turn === true) {
                 player2.incScore(piecePts);
             }
         }
@@ -459,7 +458,7 @@ function checkVertMatch(i, j, fruit) {
             board[x][y] = 0;
             if (player1.turn === true) {
                 player1.incScore(piecePts);
-            } else if (player2.active === true && player2.turn === true) {
+            } else if (gameMode === 2 && player2.turn === true) {
                 player2.incScore(piecePts);
             }
         }
@@ -559,6 +558,38 @@ function checkEndCondition() {
             }
         }
     }
+}
+
+function clearCol() {
+    let j = Math.floor(Math.random() * board[0].length);
+    for (i = 0; i < board.length; i++) {
+        board[i][j] = 0;
+    }
+}
+
+function clearRow() {
+    //clear rows only in the bottom half of board to ensure maximum helpfulness
+    let rows = [7, 8, 9, 10, 11];
+    let i = Math.floor(Math.random() * rows.length);
+    let row = rows[i];
+    for (j = 0; j < board[0].length; j++) {
+        board[row][j] = 0;
+    }
+    checkClear();
+}
+
+function clearColor() {
+    let colors = ['red', 'green', 'blue', 'yellow'];
+    let index = Math.floor(Math.random() * colors.length);
+    let color = colors[index];
+    for (i = 0; i < board.length; i++) {
+        for (j = 0; j < board[0].length; j++) {
+            if (board[i][j].color === color) {
+                board[i][j] = 0;
+            }
+        }
+    }
+    checkClear();
 }
 
 function pauseGame(e) {
@@ -703,8 +734,6 @@ document.addEventListener('DOMContentLoaded', function() {
             e.addEventListener('click', function(e) {
                 document.getElementById('playScreen').classList.toggle('hide');
                 document.getElementById('startScreen').classList.toggle('hide');
-                //player1 will always be active, in both modes
-                player1.active = true;
                 if (e.target.id === 'double') {
                     //show second player input
                     document.querySelectorAll('.p2').forEach(function(e) {
@@ -712,7 +741,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         })
                         //set game mode
                     gameMode = 2;
-                    player2.active = true;
                 }
                 if (e.target.id === 'single') {
                     document.getElementById('difficulties').classList.toggle('hide');
@@ -777,7 +805,36 @@ document.addEventListener('DOMContentLoaded', function() {
             //CCW
             let rot = 'CCW';
             rotateFruitGroup(rot);
-
+        }
+        //check player's turn and if they have powerups before activating
+        //will only have powerups in 2 player mode, so these should not go off in single player
+        if (e.key === '1') {
+            //1 is for row
+            if (player1.turn && player1.powerups.row.number > 0) {
+                player1.powerups.row.number -= 1;
+                clearRow();
+            } else if (player2.turn && player2.powerups.row.number > 0) {
+                player2.powerups.row.number -= 1;
+                clearRow();
+            }
+        } else if (e.key === '2') {
+            //2 is for column
+            if (player1.turn && player1.powerups.column.number > 0) {
+                player1.powerups.column.number -= 1;
+                clearCol();
+            } else if (player2.turn && player2.powerups.column.number > 0) {
+                player2.powerups.column.number -= 1;
+                clearCol();
+            }
+        } else if (e.key === '3') {
+            //3 is for color
+            if (player1.turn && player1.powerups.all.number > 0) {
+                player1.powerups.all.number -= 1;
+                clearColor();
+            } else if (player2.turn && player2.powerups.all.number > 0) {
+                player2.powerups.all.number -= 1;
+                clearColor();
+            }
         }
     })
 })

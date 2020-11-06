@@ -133,7 +133,7 @@ class Fruit {
         this.image = imgs[this.color - 1];
         let x = this.x - this.r;
         let y = this.y - this.r;
-        let dim = 60;
+        let dim = 50;
         ctx.drawImage(this.image, x, y, dim, dim);
         /* Circles for building functionality:
         ctx.fillStyle = this.color;
@@ -145,7 +145,7 @@ class Fruit {
 
     renderNext() {
         this.image = imgs[this.color - 1];
-        let dim = 60;
+        let dim = 50;
         let y = this.y + nextUp.height - (2 * dim / 2);
         let x = (next.width / 2) - dim / 2;
         ctxNext.drawImage(this.image, x, y, dim, dim);

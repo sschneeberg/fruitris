@@ -31,6 +31,7 @@ let gameState = 'active';
 let gameMode = 1;
 let countDown = 30000;
 let startTime = 0;
+let TimingFcns = [];
 
 class Player {
     constructor(number) {
@@ -151,8 +152,11 @@ function createFruitGroup(x, y, n) {
 function drawFruitGroup() {
     //reset spped to normal
     clearInterval(movePiece);
+    TimingFcns.push('clear1');
+    console.log(TimingFcns);
     movementSpeed = 300;
     movePiece = setInterval(dropFruitGroup, movementSpeed);
+    TimingFcns.push(movePiece);
     //for now always start in the middle above the canvas and 
     //always be groups of 3
     const startX = canvas.width / 2;
@@ -189,7 +193,6 @@ function dropFruitGroup() {
     } else {
         //add to board and create a new peice
         addFruitGroup();
-        drawFruitGroup();
     }
 
 }
@@ -237,6 +240,8 @@ function addFruitGroup() {
     }
     checkClear();
     checkEndCondition();
+    //keep adding if single player, else check if turns need to change first
+    if (gameMode === 1) { drawFruitGroup(); }
     checkChangeTurns();
 }
 
@@ -245,8 +250,8 @@ function checkChangeTurns() {
     if (gameMode === 2) {
         if (Date.now() - startTime >= countDown) {
             clearInterval(movePiece);
-            console.log(movePiece);
-            console.log(3);
+            TimingFcns.push('clear2');
+            console.log(TimingFcns);
             player1.turn = !player1.turn;
             player2.turn = !player2.turn;
             if (player1.turn) {
@@ -266,8 +271,7 @@ function checkChangeTurns() {
                 }, 1500);
                 setTimeout(function() {
                     startTime = Date.now();
-                    movementSpeed = 300;
-                    movePiece = setInterval(dropFruitGroup, movementSpeed);
+                    drawFruitGroup();
                 }, 2000);
             } else if (player2.turn) {
                 document.getElementById('turnChanger').style.opacity = 1;
@@ -286,10 +290,11 @@ function checkChangeTurns() {
                 }, 1500);
                 setTimeout(function() {
                     startTime = Date.now();
-                    movementSpeed = 300;
-                    movePiece = setInterval(dropFruitGroup, movementSpeed);
+                    drawFruitGroup();
                 }, 2000);
             }
+        } else { //if it's not time to switch, just keep drawing
+            drawFruitGroup();
         }
     }
 }
@@ -504,7 +509,9 @@ function checkEndCondition() {
     for (fruit of fruitGroup) {
         if ((fruit.y - fruit.r) <= 0) {
             gameOver = true;
-            clearInterval(movePiece)
+            clearInterval(movePiece);
+            TimingFcns.push('clear3');
+            console.log(TimingFcns);
             if (gameMode === 2) {
                 if (player1.turn) {
                     player2.won = true;
@@ -521,11 +528,14 @@ function pauseGame(e) {
         e.target.innerText = 'RESUME';
         gameState = 'paused';
         clearInterval(movePiece);
+        TimingFcns.push('clear4');
+        console.log(TimingFcns);
     } else if (gameState === 'paused') {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
         movementSpeed = 300;
         movePiece = setInterval(dropFruitGroup, movementSpeed);
+        TimingFcns.push(movePiece);
     }
 }
 
@@ -592,11 +602,12 @@ function mainMenu(e) {
     gameState = 'deactive';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     clearInterval(movePiece);
+    TimingFcns.push('clear5');
+    console.log(TimingFcns);
 }
 
 //gameloop function
 function rePaint() {
-    console.log(movePiece);
     if (!gameOver) { //clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
@@ -706,8 +717,11 @@ document.addEventListener('DOMContentLoaded', function() {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
+            TimingFcns.push('clear6');
+            console.log(TimingFcns);
             movementSpeed = 80;
             movePiece = setInterval(dropFruitGroup, movementSpeed);
+            TimingFcns.push(movePiece);
         } else if (e.key === 'ArrowDown') {
             //CW
             let rot = 'CW';

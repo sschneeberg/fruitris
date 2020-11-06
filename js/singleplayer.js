@@ -30,7 +30,7 @@ let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 let nextFruitGroup = null;
 const movement = 10;
-let movementSpeed = 300;
+let movementSpeed = 250;
 let gravitySpeed = 150;
 let movePiece = null;
 let gameOver = false;
@@ -143,8 +143,8 @@ class Fruit {
         let outsideL = this.x - this.r + dX;
         let outsideR = this.x + this.r + dX;
         let newCenterX = this.x + dX;
-        let [i, j] = this.getCell(); //use built in b/c we have it
-        j = Math.floor(newCenterX / (2 * this.r)) //adjust j
+        let i = Math.floor((this.y + this.r) / (2 * this.r));
+        let j = Math.floor(newCenterX / (2 * this.r)) //adjust j
         if (outsideL < 0 || outsideR > canvas.width) {
             //currently at the edge, cannot go further
             return false;
@@ -608,6 +608,7 @@ function pauseGame(e) {
 function resetGame(e) {
     if (e.target.id == 'restart') {
         document.getElementById('endScreen').classList.toggle('hide');
+        document.getElementById('difficulties').classList.toggle('hide');
         board = Array(12).fill().map(() => Array(9).fill(0));
         player1.clrScore();
         player2.clrScore();
@@ -667,15 +668,21 @@ function mainMenu(e) {
     //turn things off
     if (e.target.id === 'rechoose') {
         document.getElementById('endScreen').classList.toggle('hide');
+        document.querySelector('.player-info').classList.toggle('hide');
+    } else {
+        toggleButtons();
     }
-    toggleButtons();
     //turn things on
+    board = Array(12).fill().map(() => Array(9).fill(0));
+    player1.clrScore();
+    player2.clrScore();
     document.getElementById('startScreen').classList.toggle('hide');
     document.querySelector('.player-info').classList.toggle('hide');
     gameOver = true;
     gameState = 'deactive';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     clearInterval(movePiece);
+
 }
 
 //gameloop function
@@ -757,7 +764,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.difficultyBtn').forEach(function(e) {
         e.addEventListener('click', function(e) {
             if (e.target.id === 'easy') {
-                player1.highScore = 5000;
+                player1.highScore = 500;
             } else if (e.target.id === 'medium') {
                 player1.highScore = 10000;
             } else if (e.target.id === 'hard') {
@@ -774,6 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('rechoose').addEventListener('click', mainMenu);
     document.getElementById('continue').addEventListener('click', function() {
         document.getElementById('endScreen').classList.toggle('hide');
+        document.querySelector('.player-info').classList.toggle('hide');
         toggleButtons();
         gameState = 'active';
         gameOver = false;

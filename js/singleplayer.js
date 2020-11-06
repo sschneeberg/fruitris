@@ -30,7 +30,7 @@ let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 let nextFruitGroup = null;
 const movement = 10;
-let movementSpeed = 250;
+let movementSpeed = 200;
 let gravitySpeed = 150;
 let movePiece = null;
 let gameOver = false;
@@ -295,41 +295,41 @@ function checkChangeTurns() {
                 setTimeout(function() {
                     document.getElementById('turnDisp').innerText = `${player1.name}'s Turn`;
                     document.getElementById('countDown').innerText = '3';
-                }, 500)
+                }, 1000)
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '2';
-                }, 1000);
+                }, 2000);
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '1';
                     document.getElementById('turnChanger').style.opacity = 0;;
-                }, 1500);
+                }, 3000);
                 setTimeout(function() {
                     document.getElementById('player').innerText = player1.name;
                     document.getElementById('score').innerText = player1.score;
                     player1.renderPowerUps();
                     startTime = Date.now();
                     drawFruitGroup();
-                }, 2000);
+                }, 4000);
             } else if (player2.turn) {
                 document.getElementById('turnChanger').style.opacity = 1;
                 setTimeout(function() {
                     document.getElementById('turnDisp').innerText = `${player2.name}'s Turn`;
                     document.getElementById('countDown').innerText = '3';
-                }, 500)
+                }, 1000)
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '2';
-                }, 1000);
+                }, 2000);
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '1';
                     document.getElementById('turnChanger').style.opacity = 0;;
-                }, 1500);
+                }, 3000);
                 setTimeout(function() {
                     document.getElementById('player').innerText = player2.name;
                     document.getElementById('score').innerText = player2.score;
                     player2.renderPowerUps();
                     startTime = Date.now();
                     drawFruitGroup();
-                }, 2000);
+                }, 4000);
             }
         } else { //if it's not time to switch, just keep drawing
             drawFruitGroup();
@@ -536,8 +536,8 @@ function checkRot(x1, y1, x3, y3, r) {
     } else if (x3 - r < 0 || x3 + r > canvas.width) {
         //fruitGroup[2] off the edge
         return false;
-    } else if (board[i1][j1] !== 0 || board[i3][j3] !== 0) {
-        //going to hit another fruit
+    } else if (((i1 >= 0 && j1 >= 0) && (i3 >= 0 && j3 >= 0)) && (board[i1][j1] !== 0 || board[i3][j3] !== 0)) {
+        //if it's on the board: is it going to hit another fruit? if yes return false: cannot move
         return false;
     } else {
         return true;
@@ -764,7 +764,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.difficultyBtn').forEach(function(e) {
         e.addEventListener('click', function(e) {
             if (e.target.id === 'easy') {
-                player1.highScore = 500;
+                player1.highScore = 5000;
             } else if (e.target.id === 'medium') {
                 player1.highScore = 10000;
             } else if (e.target.id === 'hard') {

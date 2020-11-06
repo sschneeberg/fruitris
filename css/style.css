@@ -95,10 +95,11 @@ label {
     position: absolute;
     top: 45%;
     right: 50%;
+    text-align: center;
     transform: translate(50%, 0);
-    transition: opacity 500ms ease;
-    -moz-transition: opacity 500ms ease;
-    -webkit-transition: opacity 500ms ease;
+    transition: opacity 1s ease;
+    -moz-transition: opacity 1s ease;
+    -webkit-transition: opacity 1s ease;
 }
 
 #right {

@@ -31,7 +31,7 @@ let gameState = 'active';
 let gameMode = 1;
 let countDown = 30000;
 let startTime = 0;
-let TimingFcns = [];
+//let TimingFcns = []; debugging variable
 
 class Player {
     constructor(number) {
@@ -152,11 +152,8 @@ function createFruitGroup(x, y, n) {
 function drawFruitGroup() {
     //reset spped to normal
     clearInterval(movePiece);
-    TimingFcns.push('clear1');
-    console.log(TimingFcns);
     movementSpeed = 300;
     movePiece = setInterval(dropFruitGroup, movementSpeed);
-    TimingFcns.push(movePiece);
     //for now always start in the middle above the canvas and 
     //always be groups of 3
     const startX = canvas.width / 2;
@@ -250,8 +247,6 @@ function checkChangeTurns() {
     if (gameMode === 2) {
         if (Date.now() - startTime >= countDown) {
             clearInterval(movePiece);
-            TimingFcns.push('clear2');
-            console.log(TimingFcns);
             player1.turn = !player1.turn;
             player2.turn = !player2.turn;
             if (player1.turn) {
@@ -510,8 +505,6 @@ function checkEndCondition() {
         if ((fruit.y - fruit.r) <= 0) {
             gameOver = true;
             clearInterval(movePiece);
-            TimingFcns.push('clear3');
-            console.log(TimingFcns);
             if (gameMode === 2) {
                 if (player1.turn) {
                     player2.won = true;
@@ -528,14 +521,11 @@ function pauseGame(e) {
         e.target.innerText = 'RESUME';
         gameState = 'paused';
         clearInterval(movePiece);
-        TimingFcns.push('clear4');
-        console.log(TimingFcns);
     } else if (gameState === 'paused') {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
         movementSpeed = 300;
         movePiece = setInterval(dropFruitGroup, movementSpeed);
-        TimingFcns.push(movePiece);
     }
 }
 
@@ -602,8 +592,6 @@ function mainMenu(e) {
     gameState = 'deactive';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     clearInterval(movePiece);
-    TimingFcns.push('clear5');
-    console.log(TimingFcns);
 }
 
 //gameloop function
@@ -717,11 +705,8 @@ document.addEventListener('DOMContentLoaded', function() {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
-            TimingFcns.push('clear6');
-            console.log(TimingFcns);
             movementSpeed = 80;
             movePiece = setInterval(dropFruitGroup, movementSpeed);
-            TimingFcns.push(movePiece);
         } else if (e.key === 'ArrowDown') {
             //CW
             let rot = 'CW';

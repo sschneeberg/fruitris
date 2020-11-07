@@ -37,7 +37,7 @@ let gameOver = false;
 let piecePts = 50;
 let gameState = 'active';
 let gameMode = 1;
-let countDown = 30000;
+let countDown = 10000;
 let startTime = 0;
 //instatiate images
 let red = new Image();
@@ -73,6 +73,7 @@ class Player {
             this.addPowerUp();
         }
         if (this.highScore !== null && this.score >= this.highScore) {
+            fruitGroup = [];
             gameOver = true;
             this.won = true;
         }
@@ -303,65 +304,67 @@ function addFruitGroup() {
     checkClear();
     checkEndCondition();
     //keep adding if single player, else check if turns need to change first
-    if (gameMode === 1) { drawFruitGroup(); }
-    checkChangeTurns();
+    if (gameMode === 1) {
+        drawFruitGroup();
+    } else if (gameMode === 2) {
+        checkChangeTurns();
+    }
 }
 
 function checkChangeTurns() {
     //change turns if in two player mode and interval has passed
-    if (gameMode === 2) {
-        if (Date.now() - startTime >= countDown) {
-            clearInterval(movePiece);
-            player1.turn = !player1.turn;
-            player2.turn = !player2.turn;
-            if (player1.turn) {
-                document.getElementById('turnChanger').style.opacity = 1;
-                setTimeout(function() {
-                    document.getElementById('turnDisp').innerText = `${player1.name}'s Turn`;
-                    document.getElementById('countDown').innerText = '3';
-                }, 900)
-                setTimeout(function() {
-                    document.getElementById('countDown').innerText = '2';
-                }, 2000);
-                setTimeout(function() {
-                    document.getElementById('countDown').innerText = '1';
-                    document.getElementById('turnChanger').style.opacity = 0;
-                    document.getElementById('turnDisp').innerText = '';
-                    document.getElementById('countDown').innerText = '';
-                }, 3000);
-                setTimeout(function() {
-                    document.getElementById('player').innerText = player1.name;
-                    document.getElementById('score').innerText = player1.score;
-                    player1.renderPowerUps();
-                    startTime = Date.now();
-                    drawFruitGroup();
-                }, 4000);
-            } else if (player2.turn) {
-                document.getElementById('turnChanger').style.opacity = 1;
-                setTimeout(function() {
-                    document.getElementById('turnDisp').innerText = `${player2.name}'s Turn`;
-                    document.getElementById('countDown').innerText = '3';
-                }, 900)
-                setTimeout(function() {
-                    document.getElementById('countDown').innerText = '2';
-                }, 2000);
-                setTimeout(function() {
-                    document.getElementById('countDown').innerText = '1';
-                    document.getElementById('turnChanger').style.opacity = 0;
-                    document.getElementById('turnDisp').innerText = '';
-                    document.getElementById('countDown').innerText = '';
-                }, 3000);
-                setTimeout(function() {
-                    document.getElementById('player').innerText = player2.name;
-                    document.getElementById('score').innerText = player2.score;
-                    player2.renderPowerUps();
-                    startTime = Date.now();
-                    drawFruitGroup();
-                }, 4000);
-            }
-        } else { //if it's not time to switch, just keep drawing
-            drawFruitGroup();
+    if (Date.now() - startTime >= countDown) {
+        clearInterval(movePiece);
+        fruitGroup = [];
+        player1.turn = !player1.turn;
+        player2.turn = !player2.turn;
+        if (player1.turn) {
+            document.getElementById('turnChanger').style.opacity = 1;
+            setTimeout(function() {
+                document.getElementById('turnDisp').innerText = `${player1.name}'s Turn`;
+                document.getElementById('countDown').innerText = '3';
+            }, 900)
+            setTimeout(function() {
+                document.getElementById('countDown').innerText = '2';
+            }, 2000);
+            setTimeout(function() {
+                document.getElementById('countDown').innerText = '1';
+                document.getElementById('turnChanger').style.opacity = 0;
+            }, 3000);
+            setTimeout(function() {
+                document.getElementById('player').innerText = player1.name;
+                document.getElementById('score').innerText = player1.score;
+                document.getElementById('turnDisp').innerText = '';
+                document.getElementById('countDown').innerText = '';
+                player1.renderPowerUps();
+                startTime = Date.now();
+                drawFruitGroup();
+            }, 4000);
+        } else if (player2.turn) {
+            document.getElementById('turnChanger').style.opacity = 1;
+            setTimeout(function() {
+                document.getElementById('turnDisp').innerText = `${player2.name}'s Turn`;
+                document.getElementById('countDown').innerText = '3';
+            }, 900)
+            setTimeout(function() {
+                document.getElementById('countDown').innerText = '2';
+            }, 2000);
+            setTimeout(function() {
+                document.getElementById('countDown').innerText = '1';
+                document.getElementById('turnChanger').style.opacity = 0;
+            }, 3000);
+            setTimeout(function() {
+                document.getElementById('player').innerText = player2.name;
+                document.getElementById('score').innerText = player2.score;
+                document.getElementById('turnDisp').innerText = '';
+                document.getElementById('countDown').innerText = '';
+                player2.renderPowerUps();
+                startTime = Date.now();
+                drawFruitGroup();
+            }, 4000);
         }
+    } else { //if it's not time to switch, just keep drawing
+        drawFruitGroup();
     }
 }
 
@@ -405,6 +408,7 @@ function checkClear() {
         if (i >= 0 && j >= 0) {
             if (board[i][j] !== 0) {
                 //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
+                //this means horizontal and vertical combos will not clear both
                 checkHorizMatch(i, j, fruit);
                 checkVertMatch(i, j, fruit);
                 //checkGrow(i, j, fruit);
@@ -608,6 +612,7 @@ function checkEndCondition() {
     for (fruit of fruitGroup) {
         if ((fruit.y - fruit.r) <= 0) {
             gameOver = true;
+            fruitGroup = [];
             clearInterval(movePiece);
             if (gameMode === 2) {
                 if (player1.turn) {
@@ -775,12 +780,15 @@ function rePaint() {
         }
         for (i = 0; i < board.length; i++) {
             for (j = 0; j < board[i].length; j++) {
-                if (board[i][j] != 0) {
+                if (board[i][j] !== 0) {
                     board[i][j].render();
                 }
             }
         }
-    } else if (gameOver && gameState === 'active') { //display end screen
+    } else if (gameOver && gameState === 'active') {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
+        //display end screen
         //clear intervals
         gameState = 'deactive';
         if (player1.won) {
@@ -832,7 +840,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.target.classList.add('selected');
                 document.getElementById('medium').classList.remove('selected');
                 document.getElementById('hard').classList.remove('selected');
-                player1.highScore = 5000;
+                player1.highScore = 300;
             } else if (e.target.id === 'medium') {
                 e.target.classList.add('selected');
                 document.getElementById('easy').classList.remove('selected');

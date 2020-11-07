@@ -4,7 +4,7 @@ html {
 }
 
 body {
-    width: fit-content;
+    width: 850px;
     height: 70vh;
     margin: 0 auto;
     margin-top: 4vh;
@@ -157,6 +157,15 @@ button {
     margin: 3px;
     border-radius: 4px;
     ;
+}
+
+.selected {
+    background-color: rgba(16, 253, 87, 0.712);
+}
+
+input:focus,
+button:focus {
+    outline: none;
 }
 
 #difficulties button {

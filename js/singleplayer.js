@@ -30,7 +30,7 @@ let board = Array(12).fill().map(() => Array(9).fill(0));
 let fruitGroup = [];
 let nextFruitGroup = null;
 const movement = 10;
-let movementSpeed = 200;
+let movementSpeed = 150;
 let gravitySpeed = 150;
 let movePiece = null;
 let gameOver = false;
@@ -173,7 +173,7 @@ class Fruit {
             //currently at the edge, cannot go further
             return false;
         }
-        if (i > 0) {
+        if (i >= 0) {
             if (board[i][j] !== 0) {
                 //going to hit a stored piece
                 return false;
@@ -217,7 +217,7 @@ function createFruitGroup(x, y, n) {
 function drawFruitGroup() {
     //reset spped to normal
     clearInterval(movePiece);
-    movementSpeed = 300;
+    movementSpeed = 200;
     movePiece = setInterval(dropFruitGroup, movementSpeed);
     //for now always start in the middle above the canvas and 
     //always be groups of 3
@@ -319,13 +319,15 @@ function checkChangeTurns() {
                 setTimeout(function() {
                     document.getElementById('turnDisp').innerText = `${player1.name}'s Turn`;
                     document.getElementById('countDown').innerText = '3';
-                }, 1000)
+                }, 900)
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '2';
                 }, 2000);
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '1';
-                    document.getElementById('turnChanger').style.opacity = 0;;
+                    document.getElementById('turnChanger').style.opacity = 0;
+                    document.getElementById('turnDisp').innerText = '';
+                    document.getElementById('countDown').innerText = '';
                 }, 3000);
                 setTimeout(function() {
                     document.getElementById('player').innerText = player1.name;
@@ -339,13 +341,15 @@ function checkChangeTurns() {
                 setTimeout(function() {
                     document.getElementById('turnDisp').innerText = `${player2.name}'s Turn`;
                     document.getElementById('countDown').innerText = '3';
-                }, 1000)
+                }, 900)
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '2';
                 }, 2000);
                 setTimeout(function() {
                     document.getElementById('countDown').innerText = '1';
-                    document.getElementById('turnChanger').style.opacity = 0;;
+                    document.getElementById('turnChanger').style.opacity = 0;
+                    document.getElementById('turnDisp').innerText = '';
+                    document.getElementById('countDown').innerText = '';
                 }, 3000);
                 setTimeout(function() {
                     document.getElementById('player').innerText = player2.name;
@@ -569,7 +573,7 @@ function checkRot(x1, y1, x3, y3, r) {
     }
 }
 
-//grow fruit IN PORGRESS
+//grow fruit IN PROGRESS
 function checkGrow(i, j, fruit) {
     //check the 4 grow patterns: groups of 4 in 2x2 where one is empty and three are fruit of the same color
     if (i !== 0 && board[i - 1][j] === 0) {
@@ -635,7 +639,7 @@ function clearRow() {
 }
 
 function clearColor() {
-    let colors = ['red', 'green', 'blue', 'yellow'];
+    let colors = [1, 2, 3, 4];
     let index = Math.floor(Math.random() * colors.length);
     let color = colors[index];
     for (i = 0; i < board.length; i++) {
@@ -656,7 +660,7 @@ function pauseGame(e) {
     } else if (gameState === 'paused') {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
-        movementSpeed = 300;
+        movementSpeed = 200;
         movePiece = setInterval(dropFruitGroup, movementSpeed);
     }
 }
@@ -704,10 +708,16 @@ function startGame() {
     }
     if (gameMode === 1) { //turn off p1 menu items, turn on p1 game items
         document.getElementById('difficulties').classList.toggle('hide');
-        document.getElementById('score').innerText = `Score to beat: ${player1.highScore}`;
+
+        document.getElementById('turnChanger').style.opacity = 1;
         setTimeout(function() {
-            document.getElementById('score').innerText = player1.score;
-        }, 1500);
+            document.getElementById('turnDisp').innerText = `Score to beat: ${player1.highScore}`;
+        }, 1000)
+        setTimeout(function() {
+            document.getElementById('turnChanger').style.opacity = 0;;
+        }, 3000);
+
+        document.getElementById('score').innerText = player1.score;
     } else {
         document.getElementById('score').innerText = player1.score;
     }
@@ -812,18 +822,26 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         })
         //buttons
-    document.querySelector('form').addEventListener('submit', function(e) {
-        e.preventDefault();
+    document.getElementById('start').addEventListener('click', function() {
         document.getElementById('playScreen').classList.toggle('hide');
         startGame();
     })
     document.querySelectorAll('.difficultyBtn').forEach(function(e) {
         e.addEventListener('click', function(e) {
             if (e.target.id === 'easy') {
+                e.target.classList.add('selected');
+                document.getElementById('medium').classList.remove('selected');
+                document.getElementById('hard').classList.remove('selected');
                 player1.highScore = 5000;
             } else if (e.target.id === 'medium') {
+                e.target.classList.add('selected');
+                document.getElementById('easy').classList.remove('selected');
+                document.getElementById('hard').classList.remove('selected');
                 player1.highScore = 10000;
             } else if (e.target.id === 'hard') {
+                e.target.classList.add('selected');
+                document.getElementById('medium').classList.remove('selected');
+                document.getElementById('easy').classList.remove('selected');
                 player1.highScore = 15000;
             }
         });

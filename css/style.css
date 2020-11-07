@@ -7,7 +7,7 @@ body {
     width: 850px;
     height: 70vh;
     margin: 0 auto;
-    margin-top: 2em;
+    margin-top: 1em;
     font-family: 'Roboto', sans-serif;
     position: relative;
     color: cornsilk;
@@ -63,9 +63,8 @@ aside {
 
 .screen {
     position: absolute;
-    top: 50%;
-    right: 50%;
-    transform: translate(50%, 0);
+    top: 55%;
+    right: 27%;
     height: 300px;
     width: 400px;
     background: rgba(16, 253, 87, 0.712);

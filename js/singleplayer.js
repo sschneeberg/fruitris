@@ -855,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.target.classList.add('selected');
                 document.getElementById('medium').classList.remove('selected');
                 document.getElementById('hard').classList.remove('selected');
-                player1.highScore = 300;
+                player1.highScore = 5000;
             } else if (e.target.id === 'medium') {
                 e.target.classList.add('selected');
                 document.getElementById('easy').classList.remove('selected');

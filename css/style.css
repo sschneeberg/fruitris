@@ -7,13 +7,16 @@ body {
     width: 850px;
     height: 70vh;
     margin: 0 auto;
-    margin-top: 4vh;
+    margin-top: 2em;
+    font-family: 'Roboto', sans-serif;
     position: relative;
     color: cornsilk;
 }
 
 header {
     background: rgba(16, 253, 87, 0.712);
+    background-image: url('../imgs/foliage.png');
+    background-position: top;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
@@ -21,12 +24,17 @@ header {
 .player-info {
     display: flex;
     justify-content: space-between;
+    margin: 0 2rem 0 2rem;
 }
 
 #title {
     text-align: center;
     padding-top: 0.5em;
     margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 3em;
+    font-family: 'Londrina Sketch', cursive;
+    letter-spacing: 4px;
 }
 
 h4 {
@@ -43,6 +51,7 @@ main {
 
 aside {
     background-color: rgba(59, 30, 3, 0.616);
+    background-image: url('../imgs/bark.jpg');
     width: 200px;
 }
 
@@ -60,12 +69,13 @@ aside {
     height: 300px;
     width: 400px;
     background: rgba(16, 253, 87, 0.712);
+    background-image: url('../imgs/foliage.png');
+    background-position: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     border-radius: 6px;
-    ;
 }
 
 #difficulties {
@@ -84,6 +94,8 @@ aside {
     height: 190px;
     padding: 0.5rem;
     overflow-y: scroll;
+    background: rgba(54, 55, 56, 0.5);
+    color: rgb(221, 217, 197);
 }
 
 input {
@@ -109,19 +121,25 @@ label {
 }
 
 #right {
+    z-index: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
+    border-left: 2px solid rgb(39, 24, 13);
     border-bottom-right-radius: 6px;
+    background-position: right;
 }
 
 #left {
+    z-index: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    border-right: 2px rgb(39, 24, 13) solid;
     border-bottom-left-radius: 6px;
+    background-position: left;
 }
 
 #next,
@@ -130,6 +148,7 @@ label {
     width: 100px;
     background-color: rgba(59, 30, 3, 0.795);
     border-radius: 6px;
+    border: 2px solid rgb(39, 24, 13);
 }
 
 #next-up {
@@ -156,7 +175,8 @@ button {
     color: cornsilk;
     margin: 3px;
     border-radius: 4px;
-    ;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
 }
 
 .selected {

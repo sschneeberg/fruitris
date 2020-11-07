@@ -37,7 +37,7 @@ let gameOver = false;
 let piecePts = 50;
 let gameState = 'active';
 let gameMode = 1;
-let countDown = 10000;
+let countDown = 30000;
 let startTime = 0;
 //instatiate images
 let red = new Image();
@@ -49,6 +49,10 @@ yellow.src = 'imgs/yellow.png';
 let green = new Image();
 green.src = 'imgs/green.png';
 let imgs = [red, yellow, green, blue];
+let canvasBackground = new Image();
+canvasBackground.src = 'imgs/graphic-weave-large.png';
+let sideBackground = new Image();
+sideBackground.src = 'imgs/graphic-weave-small.png';
 
 class Player {
     constructor(number) {
@@ -59,9 +63,9 @@ class Player {
         this.won = false;
         this.highScore = 5000;
         this.powerups = {
-            row: { number: 0, color: 'cyan', startY: 100 }, //clears a row
-            column: { number: 0, color: 'magenta', startY: 40 }, //clears column
-            all: { number: 0, color: 'orange', startY: 160 }, //clears all of one color
+            row: { number: 0, url: 'imgs/row.png', y: 10 }, //clears a row
+            column: { number: 0, url: 'imgs/column.png', y: 70 }, //clears column
+            all: { number: 0, url: 'imgs/color-bomb.png', y: 135 }, //clears all of one color
         }
     }
 
@@ -94,18 +98,24 @@ class Player {
     renderPowerUps() {
         for (let type in this.powerups) {
             //draw the symbol 
+            let icon = new Image();
+            icon.src = this.powerups[type].url
+            let x = (powerUpBox.width / 2) - 25;
+            ctxPower.drawImage(icon, x, this.powerups[type].y, 60, 60);
+            /* Circles for basic functionality testing
             ctxPower.fillStyle = this.powerups[type].color;
             ctxPower.beginPath();
             ctxPower.arc(powerUpBox.width / 2, this.powerups[type].startY, 23, 0, 2 * Math.PI);
             ctxPower.fill();
+            */
             //add the count label
             ctxPower.fillStyle = 'lightgrey';
             ctxPower.beginPath();
-            ctxPower.arc(((powerUpBox.width / 2) - 15), this.powerups[type].startY - 15, 12, 0, 2 * Math.PI);
+            ctxPower.arc(((powerUpBox.width / 2) - 18), (this.powerups[type].y + 8), 12, 0, 2 * Math.PI);
             ctxPower.fill();
             ctxPower.fillStyle = 'black';
             ctxPower.font = "16px Arial";
-            ctxPower.fillText(this.powerups[type].number, ((powerUpBox.width / 2) - 20), this.powerups[type].startY - 10);
+            ctxPower.fillText(this.powerups[type].number, ((powerUpBox.width / 2) - 23), this.powerups[type].y + 13);
         }
     }
 }
@@ -752,6 +762,7 @@ function mainMenu(e) {
     gameOver = true;
     gameState = 'deactive';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(canvasBackground, 0, 0);
     clearInterval(movePiece);
 
 }
@@ -761,8 +772,11 @@ function rePaint() {
     if (!gameOver) { //clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
+        ctx.drawImage(canvasBackground, 0, 0);
+        ctxNext.drawImage(sideBackground, 0, 0);
         if (gameMode === 2) {
             ctxPower.clearRect(0, 0, powerUpBox.width, powerUpBox.height);
+            ctxPower.drawImage(sideBackground, 0, 0);
             if (player1.turn) {
                 player1.renderPowerUps();
             } else if (player2.turn) {
@@ -788,6 +802,7 @@ function rePaint() {
     } else if (gameOver && gameState === 'active') {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctxNext.clearRect(0, 0, nextUp.width, nextUp.height);
+        ctx.drawImage(canvasBackground, 0, 0);
         //display end screen
         //clear intervals
         gameState = 'deactive';

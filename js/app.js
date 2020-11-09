@@ -293,7 +293,7 @@ function checkBottom() {
 }
 
 //find the fall limit: 
-//farthest a fruit can fall before the bottom or the top fruit
+//farthest a fruit can fall in its column before hits the bottom or the top fruit of the stack
 function getBaseline(fruit) {
     let j = Math.floor(fruit.x / (2 * fruit.r));
     let count = 0;

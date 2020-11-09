@@ -1,3 +1,5 @@
+//import _ from 'lodash';
+
 //Set up Canvases
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -144,6 +146,7 @@ class Fruit {
         this.sAngle = 0;
         this.eAngle = 2 * Math.PI;
         this.orientation = 'vertical';
+        this.grow = false;
         //what can it fall to before stopping?
         this.baseline = canvas.height;
         this.image = '';
@@ -154,7 +157,7 @@ class Fruit {
         this.image = imgs[this.color - 1];
         let x = this.x - this.r;
         let y = this.y - this.r;
-        let dim = 50;
+        let dim = 2 * this.r;
         ctx.drawImage(this.image, x, y, dim, dim);
         /* Circles for building functionality:
         ctx.fillStyle = this.color;
@@ -397,15 +400,18 @@ function fruitFall() {
         for (j = 0; j < board[0].length; j++) {
             //if there is a fruit above, but the current spot is empty
             if (board[i][j] === 0 && board[i - 1][j] !== 0) {
-                //count = count + 1;
-                //move the fruit to the current row and update is position
-                //THIS CAUSED A MYSTERY BUG: add delay to look more like falling
-                //await delay(300);
-                board[i][j] = board[i - 1][j];
-                board[i][j].y = board[i][j].y + (2 * board[i][j].r);
-                board[i - 1][j] = 0;
-                checkHorizMatch(i, j, board[i][j]);
-                checkVertMatch(i, j, board[i][j]);
+                if (!board[i - 1][j].grow) { //count = count + 1;
+                    //move the fruit to the current row and update is position
+                    //THIS CAUSED A MYSTERY BUG: add delay to look more like falling
+                    //await delay(300);
+                    board[i][j] = board[i - 1][j];
+                    board[i][j].y = board[i][j].y + (2 * board[i][j].r);
+                    board[i - 1][j] = 0;
+                    checkHorizMatch(i, j, board[i][j]);
+                    checkVertMatch(i, j, board[i][j]);
+                    console.log('fall: ', i, j, board[i][j])
+                    growFruit(i, j, board[i][j]);
+                }
             } //otherwise do nothing, the fruit stays put
         }
     }
@@ -434,7 +440,8 @@ function checkClear() {
                 let horiz = checkHorizMatch(i, j, fruit);
                 let vert = checkVertMatch(i, j, fruit);
                 if (horiz || vert) { count = count + 1; }
-                //checkGrow(i, j, fruit);
+                console.log('curr: ', fruit)
+                growFruit(i, j, fruit);
             }
         }
     }
@@ -464,12 +471,23 @@ function checkHorizMatch(i, j, fruit) {
             break;
         }
     }
+    let matchLength = 3;
+    for (let coord of matchedFruit) {
+        let x = coord[0];
+        let y = coord[1];
+        if (board[x][y].grow) {
+            matchLength = 4;
+        }
+    }
     //matches must be at least 3
-    if (matchedFruit.length >= 3) {
+    if (matchedFruit.length >= matchLength) {
         //if enough, clear fruit and return true
         for (let coord of matchedFruit) {
             let x = coord[0];
             let y = coord[1];
+            if (board[x][y].grow) {
+                removeGrow(board[x][y], x, y);
+            }
             board[x][y] = 0;
             if (player1.turn === true) {
                 player1.incScore(piecePts);
@@ -506,12 +524,23 @@ function checkVertMatch(i, j, fruit) {
             break;
         }
     }
+    let matchLength = 3;
+    for (let coord of matchedFruit) {
+        let x = coord[0];
+        let y = coord[1];
+        if (board[x][y].grow) {
+            matchLength = 4;
+        }
+    }
     //matches must be at least 3
-    if (matchedFruit.length >= 3) {
+    if (matchedFruit.length >= matchLength) {
         //if enough matches, clear surrounding fruit and return true
         for (let coord of matchedFruit) {
             let x = coord[0];
             let y = coord[1];
+            if (board[x][y].grow) {
+                removeGrow(board[x][y], x, y);
+            }
             board[x][y] = 0;
             if (player1.turn === true) {
                 player1.incScore(piecePts);
@@ -601,35 +630,178 @@ function checkRot(x1, y1, x3, y3, r) {
     }
 }
 
+function growFruit(i, j, fruit) {
+    console.log('check: ', fruit);
+    let condition = checkGrow(i, j, fruit);
+    let [avgX, avgY] = getAvg(condition);
+    for (let coord of condition) {
+        let [x, y] = coord;
+        console.log(board[x][y])
+        board[x][y].r = 50;
+        board[x][y].grow = true;
+        console.log(avgX, avgY);
+        board[x][y].x = avgX;
+        board[x][y].y = avgY;
+    }
+
+}
+
+function getAvg(coordinates) {
+    let xTotal = 0;
+    let yTotal = 0;
+    for (let coord of coordinates) {
+        let [x, y] = coord;
+        if (board[x][y] !== 0) {
+            xTotal = xTotal + board[x][y].x;
+            yTotal = yTotal + board[x][y].y;
+        }
+    }
+    return [Math.floor(xTotal / 4), Math.floor(yTotal / 4)];
+}
+
 //grow fruit IN PROGRESS
 function checkGrow(i, j, fruit) {
     //check the 4 grow patterns: groups of 4 in 2x2 where one is empty and three are fruit of the same color
+    console.log('checking')
+    if (i !== board.length - 1) {
+        console.log(board[i + 1][j] !== 0)
+    }
     if (i !== 0 && board[i - 1][j] === 0) {
-        if (board[i][j + 1] !== 0 && board[i - 1][j + 1] !== 0) {
+        console.log('1/2')
+        if (board[i][j + 1] !== 0 && board[i - 1][j + 1] !== 0 && j !== (board[0].length - 1)) {
+            console.log('1')
             if (board[i][j + 1].color === board[i - 1][j + 1].color && board[i - 1][j + 1].color === fruit.color) {
+                let newFruit = _.cloneDeep(fruit);
+                newFruit.y = newFruit.y - 50
+                board[i - 1][j] = newFruit;
+                console.log(board[i][j]);
+                console.log('new:', board[i - 1][j]);
                 //pattern 1
-                return true;
+                let condition = [
+                    [i, j],
+                    [i, j + 1],
+                    [i - 1, j],
+                    [i - 1, j + 1]
+                ];
+                //make sure none of the cluster belongs to an already grown fruit cluster
+                let grown = false;
+                for (let coord of condition) {
+                    let [x, y] = coord;
+                    if (board[x][y].grow) {
+                        grown = true;
+                    }
+                }
+                if (!grown) { return condition; }
             }
-        } else if (board[i][j - 1] !== 0 && board[i - 1][j - 1] !== 0) {
+        } else if (board[i][j - 1] !== 0 && board[i - 1][j - 1] !== 0 && j !== 0) {
+            console.log('2')
             if (board[i][j - 1].color === board[i - 1][j - 1].color && board[i - 1][j - 1].color === fruit.color) {
+                let newFruit = _.cloneDeep(fruit);
+                newFruit.y = newFruit.y - 50
+                board[i - 1][j] = newFruit;
+                console.log(board[i][j]);
+                console.log('new:', board[i - 1][j]);
                 //pattern 2
-                return true;
-            }
-        }
-    } else if (i !== (board.length - 1) && board[i + 1][j] !== 0) {
-        if (board[i][j - 1] === 0 && board[i + 1][j - 1] !== 0) {
-            if (board[i + 1][j - 1].color === board[i + 1][j].color && board[i + 1][j].color === fruit.color) {
-                //pattern 3
-                return true;
-            }
-        } else if (board[i][j + 1] === 0 && board[i - 1][j - 1] !== 0) {
-            if (board[i - 1][j - 1].color === board[i + 1][j].color && board[i + 1][j].color === fruit.color) {
-                //pattern 4
-                return true;
+                let condition = [
+                    [i, j],
+                    [i, j - 1],
+                    [i - 1, j - 1],
+                    [i - 1, j]
+                ];
+                //make sure none of the cluster belongs to an already grown fruit cluster
+                let grown = false;
+                for (let coord of condition) {
+                    let [x, y] = coord;
+                    if (board[x][y].grow) {
+                        grown = true;
+                    }
+                }
+                if (!grown) { return condition; }
             }
         }
     }
-    return false;
+    if (i !== (board.length - 1) && board[i + 1][j] !== 0) {
+        console.log('3/4:')
+        if (board[i][j - 1] === 0 && board[i + 1][j - 1] !== 0 && j !== 0) {
+            console.log('3:')
+            if (board[i + 1][j - 1].color === board[i + 1][j].color && board[i + 1][j].color === fruit.color) {
+
+                let newFruit = _.cloneDeep(fruit);
+                newFruit.x = newFruit.x - 50
+                board[i][j - 1] = newFruit;
+                console.log(board[i][j]);
+                console.log('3:', board[i][j - 1]);
+                //pattern 3
+                let condition = [
+                    [i, j],
+                    [i + 1, j],
+                    [i + 1, j - 1],
+                    [i, j - 1]
+                ];
+                //make sure none of the cluster belongs to an already grown fruit cluster
+                let grown = false;
+                for (let coord of condition) {
+                    let [x, y] = coord;
+                    if (board[x][y].grow) {
+                        grown = true;
+                    }
+                }
+                if (!grown) { return condition; }
+            }
+        } else if (board[i][j + 1] === 0 && board[i + 1][j + 1] !== 0 && j !== (board[0].length - 1)) {
+            console.log('4:')
+            if (board[i + 1][j + 1].color === board[i + 1][j].color && board[i + 1][j].color === fruit.color) {
+                let newFruit = _.cloneDeep(fruit);
+                newFruit.x = newFruit.x + 50
+                board[i][j + 1] = newFruit;
+                console.log(board[i][j]);
+                console.log('4:', board[i][j + 1]);
+                //pattern 4
+                let condition = [
+                    [i, j],
+                    [i, j + 1],
+                    [i + 1, j + 1],
+                    [i + 1, j]
+                ];
+                //make sure none of the cluster belongs to an already grown fruit cluster
+                let grown = false;
+                for (let coord of condition) {
+                    let [x, y] = coord;
+                    if (board[x][y].grow) {
+                        grown = true;
+                    }
+                }
+                if (!grown) { return condition; }
+            }
+        }
+    }
+    return [];
+}
+
+//recursively find and remove the grown fruit
+function removeGrow(fruit, i, j) {
+    //check up, right, left, down 
+    if (!isLegal(i, j)) { //make sure you stay in the board
+        return;
+    }
+    if (board[i][j] === 0 || !board[i][j].grow || board[i][j].color !== fruit.color) {
+        //dont wipe the ones that arent part of this grown fruit
+        return;
+    }
+    board[i][j] = 0;
+    removeGrow(fruit, (i - 1), j) //up
+    removeGrow(fruit, i, (j + 1)) //right
+    removeGrow(fruit, (i + 1), j) //down
+    removeGrow(fruit, i, (j - 1)) //left
+}
+
+//are we in the board?
+function isLegal(i, j) {
+    if (i >= 0 && i < board.length && j >= 0 && j < board[0].length) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function checkEndCondition() {
@@ -703,6 +875,12 @@ function resetGame(e) {
         player2.clrScore();
         startGame();
     } else if (gameMode === 1) {
+        if (gameState === 'paused') {
+            document.getElementById('pause').innerText = 'PAUSE';
+            gameState = 'active';
+            movementSpeed = 200;
+            movePiece = setInterval(dropFruitGroup, (movementSpeed * movementMultiplier));
+        }
         board = Array(12).fill().map(() => Array(9).fill(0));
         player1.clrScore();
         drawFruitGroup();

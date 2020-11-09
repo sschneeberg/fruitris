@@ -158,6 +158,16 @@ Player information is stored in its own class object, with values to track a win
 
 Should I return to this game in the future, I would look to deploy the following aspects:
 
+## Grow Function
+
+The grow function is a work in progress that currently exsists in its own branch in the non-deployed repository.  The grow feature is a part of the original Gadsgadgame and add a layer of difficulty by turning clusters of three (think L shapes) into a larger fruit that occupies the space of four small fruits.  Because they now land in two columns, the large fruit can create gaps beneath that you cannot reach, making it harder to strategically not fill the board. These large berries only count as a singular fruit and require two more matching small fruits to be cleared from the board. 
+###
+Due to the presentation deadline, I put this feature on hold to ensure the smooth functionality of the rest of the game.  At this point in time, the grow function succesfully turns L shaped groups of three into single large fruits and handles their new matching capabilities.  The gravity function has been modified to ensure that any gaps below large fruit are not seen as an issue. More time is needed to iron out mishandled cases that appear when clusters are created when matches are removed from the board.  Below is a screenshot of a test run with grow.  I would say at this point, the functionality is roughly 80-85% complete.
+###
+![Grow Function](imgs/readme-imgs/grow.png)
+###
+&nbsp;
+
 ## 2-Player Split Screen 
 
 Rather than compete to not fill the same board as your opponent, two players could operate boards side by side and race to a high score win condition or simply battle it out for the highest score.  This would be easy to implement with the javascript I have written; however, my html set up would require some refactoring and restructuring.
@@ -168,6 +178,7 @@ The focus of this week long endeavor has primarily been the functionality of the
 ### 
 The grow affect can be achieved using `key frames` and the `transform: scale()` property in css; however, this applies on element creation/loading.  Because I favored the manipulation of element text over element creation, I would need a different animation strategy or to reapproach my end screen display.  
 ###
+
 
 # PROCESS WORK
 

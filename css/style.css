@@ -63,8 +63,9 @@ aside {
 
 .screen {
     position: absolute;
-    top: 55%;
-    right: 27%;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, 0%);
     height: 300px;
     width: 400px;
     background: rgba(16, 253, 87, 0.712);

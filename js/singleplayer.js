@@ -31,27 +31,28 @@ let fruitGroup = [];
 let nextFruitGroup = null;
 const movement = 10;
 let movementSpeed = 150;
-let gravitySpeed = 150;
+let movementMultiplier = 1;
+const gravitySpeed = 150;
 let movePiece = null;
 let gameOver = false;
 let piecePts = 50;
 let gameState = 'active';
 let gameMode = 1;
-let countDown = 30000;
+const countDown = 30000;
 let startTime = 0;
 //instatiate images
-let red = new Image();
+const red = new Image();
 red.src = 'imgs/red.png';
-let blue = new Image();
+const blue = new Image();
 blue.src = 'imgs/blue.png';
-let yellow = new Image();
+const yellow = new Image();
 yellow.src = 'imgs/yellow.png';
-let green = new Image();
+const green = new Image();
 green.src = 'imgs/green.png';
-let imgs = [red, yellow, green, blue];
-let canvasBackground = new Image();
+const imgs = [red, yellow, green, blue];
+const canvasBackground = new Image();
 canvasBackground.src = 'imgs/graphic-weave-large.png';
-let sideBackground = new Image();
+const sideBackground = new Image();
 sideBackground.src = 'imgs/graphic-weave-small.png';
 
 class Player {
@@ -76,6 +77,15 @@ class Player {
             //every 500 pts add a random powerup
             this.addPowerUp();
         }
+        if (gameMode === 1 && this.score % 2000 === 0) {
+            if (movementMultiplier > 0.4) {
+                movementMultiplier = movementMultiplier - 0.15;
+            }
+        }
+        this.checkScore();
+    }
+
+    checkScore() {
         if (this.highScore !== null && this.score >= this.highScore) {
             fruitGroup = [];
             gameOver = true;
@@ -196,7 +206,7 @@ class Fruit {
     //hits bottom/y limit
     checkHit() {
         let bottom = this.y + this.r + movement;
-        if (bottom > fruit.baseline) {
+        if (bottom > this.baseline) {
             return false;
         } else {
             return true;
@@ -229,7 +239,7 @@ function drawFruitGroup() {
     //reset spped to normal
     clearInterval(movePiece);
     movementSpeed = 200;
-    movePiece = setInterval(dropFruitGroup, movementSpeed);
+    movePiece = setInterval(dropFruitGroup, (movementSpeed * movementMultiplier));
     //for now always start in the middle above the canvas and 
     //always be groups of 3
     const startX = canvas.width / 2;
@@ -247,20 +257,21 @@ function drawFruitGroup() {
     nextFruitGroup = [];
     //get a new next one
     createFruitGroup(startX, startY, n);
-    for (fruit of fruitGroup) {
+    for (let fruit of fruitGroup) {
         fruit.render();
     }
-    for (fruit of nextFruitGroup) {
+    for (let fruit of nextFruitGroup) {
         fruit.renderNext()
     }
 }
 
 //move piece down on time interval until hits fall limit
 function dropFruitGroup() {
+    fruitFall();
     //if everything can move
     if (checkBottom()) {
         //drop pieces
-        for (fruit of fruitGroup) {
+        for (let fruit of fruitGroup) {
             fruit.y = fruit.y + movement;
         }
     } else {
@@ -272,7 +283,7 @@ function dropFruitGroup() {
 
 //check if we hit the fall limit
 function checkBottom() {
-    for (fruit of fruitGroup) {
+    for (let fruit of fruitGroup) {
         getBaseline(fruit);
         if (!fruit.checkHit()) {
             return false;
@@ -286,7 +297,7 @@ function checkBottom() {
 function getBaseline(fruit) {
     let j = Math.floor(fruit.x / (2 * fruit.r));
     let count = 0;
-    if (j > 0 && j < board[0].length) {
+    if (j >= 0 && j < board[0].length) {
         for (i = (board.length - 1); i > 0; i--) {
             if (board[i][j] === 0) {
                 //if nothing is found
@@ -303,7 +314,7 @@ function getBaseline(fruit) {
 
 //add pieces to the board once they hit the bottom or the top layer of fruit
 function addFruitGroup() {
-    for (fruit of fruitGroup) {
+    for (let fruit of fruitGroup) {
         //store color in board at correct location
         let [i, j] = fruit.getCell();
         //fruit.y = fruit.baseline;
@@ -312,7 +323,7 @@ function addFruitGroup() {
         }
     }
     checkClear();
-    checkEndCondition();
+    //checkEndCondition();
     //keep adding if single player, else check if turns need to change first
     if (gameMode === 1) {
         drawFruitGroup();
@@ -413,18 +424,21 @@ const delay = (ms) => new Promise(resolve => {
 
 //check if you have three in a row and remove them 
 function checkClear() {
-    for (fruit of fruitGroup) {
+    let count = 0;
+    for (let fruit of fruitGroup) {
         let [i, j] = fruit.getCell();
         if (i >= 0 && j >= 0) {
             if (board[i][j] !== 0) {
                 //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
                 //this means horizontal and vertical combos will not clear both
-                checkHorizMatch(i, j, fruit);
-                checkVertMatch(i, j, fruit);
+                let horiz = checkHorizMatch(i, j, fruit);
+                let vert = checkVertMatch(i, j, fruit);
+                if (horiz || vert) { count = count + 1; }
                 //checkGrow(i, j, fruit);
             }
         }
     }
+    if (count === 0) { checkEndCondition(); }
 }
 
 //check for horizontal matches from current fruit
@@ -453,7 +467,7 @@ function checkHorizMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough, clear fruit and return true
-        for (coord of matchedFruit) {
+        for (let coord of matchedFruit) {
             let x = coord[0];
             let y = coord[1];
             board[x][y] = 0;
@@ -495,7 +509,7 @@ function checkVertMatch(i, j, fruit) {
     //matches must be at least 3
     if (matchedFruit.length >= 3) {
         //if enough matches, clear surrounding fruit and return true
-        for (coord of matchedFruit) {
+        for (let coord of matchedFruit) {
             let x = coord[0];
             let y = coord[1];
             board[x][y] = 0;
@@ -514,7 +528,7 @@ function checkVertMatch(i, j, fruit) {
 //move group of three side to side, runs on user key press
 function moveFruitGroup(dX) {
     if (fruitGroup[0].checkBoundaries(dX) && fruitGroup[2].checkBoundaries(dX)) {
-        for (fruit of fruitGroup) {
+        for (let fruit of fruitGroup) {
             fruit.move(dX);
         }
     }
@@ -565,10 +579,10 @@ function rotateFruitGroup(direction) {
 
 //make sure we can't rotate piece off the board
 function checkRot(x1, y1, x3, y3, r) {
-    let i1 = Math.floor(y1 / (2 * r));
     let j1 = Math.floor(x1 / (2 * r));
-    let i3 = Math.floor(y3 / (2 * r));
     let j3 = Math.floor(x3 / (2 * r));
+    let i1b = Math.floor((y1 + r) / (2 * r));
+    let i3b = Math.floor((y3 + r) / (2 * r));
     //return true if piece can rotate, return false otherwise
     if (y1 + r > canvas.height || y3 + r > canvas.height) {
         //beyond bottom can't rotate here
@@ -579,7 +593,7 @@ function checkRot(x1, y1, x3, y3, r) {
     } else if (x3 - r < 0 || x3 + r > canvas.width) {
         //fruitGroup[2] off the edge
         return false;
-    } else if (((i1 >= 0 && j1 >= 0) && (i3 >= 0 && j3 >= 0)) && (board[i1][j1] !== 0 || board[i3][j3] !== 0)) {
+    } else if ((((i1b) >= 0 && (j1) >= 0) && ((i3b) >= 0 && (j3) >= 0)) && (board[i1b][j1] !== 0 || board[i3b][j3] !== 0)) {
         //if it's on the board: is it going to hit another fruit? if yes return false: cannot move
         return false;
     } else {
@@ -619,8 +633,8 @@ function checkGrow(i, j, fruit) {
 }
 
 function checkEndCondition() {
-    for (fruit of fruitGroup) {
-        if ((fruit.y - fruit.r) <= 0) {
+    for (j = 0; j < board[0].length; j++) {
+        if ((board[0][j]) !== 0 && board[0][j].y < 50) {
             gameOver = true;
             fruitGroup = [];
             clearInterval(movePiece);
@@ -676,7 +690,7 @@ function pauseGame(e) {
         e.target.innerText = 'PAUSE';
         gameState = 'active';
         movementSpeed = 200;
-        movePiece = setInterval(dropFruitGroup, movementSpeed);
+        movePiece = setInterval(dropFruitGroup, (movementSpeed * movementMultiplier));
     }
 }
 
@@ -741,7 +755,7 @@ function startGame() {
     document.getElementById('player').innerText = player1.name;
     startTime = Date.now();
     drawFruitGroup();
-    gravity = setInterval(fruitFall, gravitySpeed);
+    //gravity = setInterval(fruitFall, gravitySpeed);
 }
 
 //reset to start screen
@@ -784,11 +798,11 @@ function rePaint() {
             }
         }
         //re render
-        for (fruit of fruitGroup) {
+        for (let fruit of fruitGroup) {
             fruit.render();
         }
         if (nextFruitGroup !== null) {
-            for (fruit of nextFruitGroup) {
+            for (let fruit of nextFruitGroup) {
                 fruit.renderNext();
             }
         }
@@ -890,18 +904,17 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
             //left
-            let dX = -(2 * fruit.r);
+            let dX = -50;
             moveFruitGroup(dX);
         } else if (e.key === 'ArrowRight') {
             //right
-            let dX = 2 * fruit.r;
+            let dX = 50;
             moveFruitGroup(dX);
         } else if (e.key === 'Shift' && gameState !== 'paused') {
             //speed up on press NOT HOLD
             //Reset when new piece is drawn
             clearInterval(movePiece);
-            movementSpeed = 80;
-            movePiece = setInterval(dropFruitGroup, movementSpeed);
+            movePiece = setInterval(dropFruitGroup, 80);
         } else if (e.key === 'ArrowDown') {
             //CW
             let rot = 'CW';

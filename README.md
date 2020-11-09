@@ -15,6 +15,20 @@ In `Two Player Mode`, you and your opponent will switch off playing the same boa
 
 Release your bonuses using `1` to clear a row, `2` to zap a column, and `3` to drop a color bomb.
 
+## Start Up Screen:
+![Main Menu](imgs/readme-imgs/main-menu.png)
+###
+## Single Player Mode:
+![Single Player](imgs/readme-imgs/single-player.png)
+###
+![Single Player](imgs/readme-imgs/win-screen.png)
+###
+## Two Player Mode:
+![Two Player](imgs/readme-imgs/two-player.png)
+###
+&nbsp;
+&nbsp;
+
 # HOW TO INSTALL
 
 1. `Fork` and `Clone` this respository to your local machine
@@ -24,6 +38,10 @@ Release your bonuses using `1` to clear a row, `2` to zap a column, and `3` to d
 ## Please note: All icons used in this game a free downloads from craftpix.net
 These are not intended for commercial use.  This is an educational and personal project.
 ###
+This project was created as classwork for General Assembly's Software Engineering Immersive.  This project was modeled off of Gadgadsgame for the sake of nostalgia, which I further modified to challenge my creativity and ability.  It was my mother's favorite game to play when I left my neopet account open on her computer.  According to my father, she has already been playing "non stop for days."
+###
+&nbsp;
+&nbsp;
 
 # HOW IT WORKS
 
@@ -133,8 +151,10 @@ function clearColor() {
 ###
 Player information is stored in its own class object, with values to track a wins, turns, power ups, and scores.  The game is controlled through DOM manipulation and event listeners, running primarily on `click` and `keydown` actions.  Rather than create and remove DOM elements, `inner text` is changed and a `hide` class in toggled to display each screen as needed in game play.
 ###
+&nbsp;
+&nbsp;
 
-# Future Considerations
+# FUTURE CONSIDERATIONS
 
 Should I return to this game in the future, I would look to deploy the following aspects:
 
@@ -147,6 +167,39 @@ Rather than compete to not fill the same board as your opponent, two players cou
 The focus of this week long endeavor has primarily been the functionality of the game. While a decent portion of time was put towards styling both the css and the html canvas graphics, I weighed the addition of transitions and animations slightly less than ensuring all modes could successfully be played and bugs were ironed out once projects were deployed, and before being presented. If I were to put more time, I would like to add small animations such as a pop when fruits are removed and a grow in of the end screen on win or lose.  
 ### 
 The grow affect can be achieved using `key frames` and the `transform: scale()` property in css; however, this applies on element creation/loading.  Because I favored the manipulation of element text over element creation, I would need a different animation strategy or to reapproach my end screen display.  
+###
 
+# PROCESS WORK
 
+## Initial Wireframes:
+###
+![Start Screen](imgs/readme-imgs/startscreen.jpeg)
+###
+###
+![Single Player](imgs/readme-imgs/singleplayer.jpeg)
+###
+###
+![Two Player](imgs/readme-imgs/2player.jpeg)
+###
+###
+![End Screen](imgs/readme-imgs/endscreen.jpeg)
+###
+
+&nbsp;
+&nbsp;
+
+## Scratch Work:
+
+Rotate Function:
+###
+![Rotate Function](imgs/readme-imgs/rotate.jpg)
+###
+Match Making (V1):
+###
+![Two Player](imgs/readme-imgs/clear.jpg)
+###
+Grow Function:
+###
+![End Screen](imgs/readme-imgs/grow.jpg)
+###
 

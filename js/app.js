@@ -390,7 +390,6 @@ function checkChangeTurns() {
 }
 
 //institute gravity: if the spot is empty, drop the fruit
-//MYSTERY BUG: async 
 function fruitFall() {
     //count = 0;
     for (i = 1; i < board.length; i++) {
@@ -399,8 +398,6 @@ function fruitFall() {
             if (board[i][j] === 0 && board[i - 1][j] !== 0) {
                 //count = count + 1;
                 //move the fruit to the current row and update is position
-                //THIS CAUSED A MYSTERY BUG: add delay to look more like falling
-                //await delay(300);
                 board[i][j] = board[i - 1][j];
                 board[i][j].y = board[i][j].y + (2 * board[i][j].r);
                 board[i - 1][j] = 0;
@@ -412,18 +409,7 @@ function fruitFall() {
             } //otherwise do nothing, the fruit stays put
         }
     }
-    /* No longer need recursion now that gravity runs constantly
-    if (count != 0) {
-        //if something moved, go back and make sure nothing else has to move
-        fruitFall();
-    } */
 }
-
-/*
-//CAUSED A MYSTERY BUG: appending a tenth element to a row full of undefined
-const delay = (ms) => new Promise(resolve => {
-    setTimeout(resolve, ms);
-}) */
 
 //check if you have three in a row and remove them 
 function checkClear() {
@@ -721,8 +707,11 @@ function startGame() {
             document.getElementById('turnDisp').innerText = `Score to beat: ${player1.highScore}`;
         }, 1000)
         setTimeout(function() {
-            document.getElementById('turnChanger').style.opacity = 0;;
+            document.getElementById('turnChanger').style.opacity = 0;
         }, 3000);
+        setTimeout(function() {
+            document.getElementById('turnDisp').innerText = '';
+        }, 4000);
 
         document.getElementById('score').innerText = player1.score;
     } else {
@@ -749,6 +738,7 @@ function mainMenu(e) {
     board = Array(12).fill().map(() => Array(9).fill(0));
     player1.clrScore();
     player2.clrScore();
+    document.getElementById('turnDisp').innerText = '';
     document.getElementById('startScreen').classList.toggle('hide');
     document.querySelector('.player-info').classList.toggle('hide');
     gameOver = true;
@@ -818,6 +808,7 @@ function rePaint() {
 
 //React to player input
 document.addEventListener('DOMContentLoaded', function() {
+    setInterval(rePaint, 80);
     document.querySelectorAll('.modeBtn').forEach(function(e) {
             e.addEventListener('click', function(e) {
                 document.getElementById('playScreen').classList.toggle('hide');
@@ -895,11 +886,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     //move pieces
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft') {
+        if (gameState === 'paused') { return; }
+        if ((e.key === 'ArrowLeft' && player1.turn) || (e.key === 'a' && player2.turn)) {
             //left
             let dX = -50;
             moveFruitGroup(dX);
-        } else if (e.key === 'ArrowRight') {
+        } else if ((e.key === 'ArrowRight' && player1.turn) || (e.key === 'd' && player2.turn)) {
             //right
             let dX = 50;
             moveFruitGroup(dX);
@@ -908,11 +900,11 @@ document.addEventListener('DOMContentLoaded', function() {
             //Reset when new piece is drawn
             clearInterval(movePiece);
             movePiece = setInterval(dropFruitGroup, 80);
-        } else if (e.key === 'ArrowDown') {
+        } else if ((e.key === 'ArrowDown' && player1.turn) || (e.key === 's' && player2.turn)) {
             //CW
             let rot = 'CW';
             rotateFruitGroup(rot);
-        } else if (e.key === 'ArrowUp') {
+        } else if ((e.key === 'ArrowUp' && player1.turn) || (e.key === 'w' && player2.turn)) {
             //CCW
             let rot = 'CCW';
             rotateFruitGroup(rot);
@@ -949,5 +941,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     })
 })
-
-setInterval(rePaint, 80);

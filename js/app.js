@@ -694,6 +694,7 @@ function toggleButtons() {
         document.getElementById('powerUp').classList.toggle('hide');
     }
     document.getElementById('menu').classList.toggle('hide');
+    document.getElementById('info').classList.toggle('hide');
     //toggle next up screen too
     document.getElementById('next').classList.toggle('hide');
     document.getElementById('next-up').classList.toggle('hide');
@@ -864,6 +865,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('pause').addEventListener('click', pauseGame);
     document.getElementById('menu').addEventListener('click', mainMenu);
     document.getElementById('reset').addEventListener('click', resetGame);
+    //ingame instructions per my mother's request
+    document.getElementById('info').addEventListener('click', function() {
+        gameState = 'paused';
+        clearInterval(movePiece);
+        document.getElementById('helpScreen').classList.toggle('hide');
+        document.getElementById('instructions').innerHTML = instructions;
+        document.getElementById('return').addEventListener('click', function() {
+            if (gameState === 'paused') {
+                document.getElementById('startScreen').classList.toggle('hide');
+                gameState = 'active';
+                movementSpeed = 200;
+                movePiece = setInterval(dropFruitGroup, (movementSpeed * movementMultiplier));
+            }
+        })
+    });
     //at end of game
     document.getElementById('restart').addEventListener('click', resetGame);
     document.getElementById('rechoose').addEventListener('click', mainMenu);

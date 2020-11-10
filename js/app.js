@@ -1,5 +1,3 @@
-//import _ from 'lodash';
-
 //Set up Canvases
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -150,6 +148,15 @@ class Fruit {
         //what can it fall to before stopping?
         this.baseline = canvas.height;
         this.image = '';
+    }
+
+    checkDoneFalling() {
+        let [i, j] = this.getCell();
+        if (i === board.length - 1 || board[i + 1][j] !== 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     render() {
@@ -407,9 +414,11 @@ function fruitFall() {
                     board[i][j] = board[i - 1][j];
                     board[i][j].y = board[i][j].y + (2 * board[i][j].r);
                     board[i - 1][j] = 0;
-                    checkHorizMatch(i, j, board[i][j]);
-                    checkVertMatch(i, j, board[i][j]);
-                    growFruit(i, j, board[i][j]);
+                    if (board[i][j].checkDoneFalling()) {
+                        checkHorizMatch(i, j, board[i][j]);
+                        checkVertMatch(i, j, board[i][j]);
+                        growFruit(i, j, board[i][j]);
+                    }
                 }
             } //otherwise do nothing, the fruit stays put
         }
@@ -436,10 +445,12 @@ function checkClear() {
             if (board[i][j] !== 0) {
                 //if this fruit hasn't already been removed by checking a previous fruit then check if it created matches
                 //this means horizontal and vertical combos will not clear both
-                let horiz = checkHorizMatch(i, j, fruit);
-                let vert = checkVertMatch(i, j, fruit);
-                if (horiz || vert) { count = count + 1; }
-                growFruit(i, j, fruit);
+                if (fruit.checkDoneFalling()) {
+                    let horiz = checkHorizMatch(i, j, fruit);
+                    let vert = checkVertMatch(i, j, fruit);
+                    if (horiz || vert) { count = count + 1; }
+                    growFruit(i, j, fruit);
+                }
             }
         }
     }
@@ -453,7 +464,7 @@ function checkHorizMatch(i, j, fruit) {
     ];
     //check for matches moving left from current fruit
     for (n = j - 1; n > -1; n--) {
-        if (board[i][n] !== 0 && board[i][n].color === fruit.color) {
+        if (board[i][n] !== 0 && board[i][n].color === fruit.color && board[i][n].checkDoneFalling()) {
             matchedFruit.push([i, n]);
         } else {
             //if the next one to the left doesn't match stop checking
@@ -462,7 +473,7 @@ function checkHorizMatch(i, j, fruit) {
     }
     //check for matches moving right from current fruit
     for (n = j + 1; n < board[i].length; n++) {
-        if (board[i][n] !== 0 && board[i][n].color === fruit.color) {
+        if (board[i][n] !== 0 && board[i][n].color === fruit.color && board[i][n].checkDoneFalling()) {
             matchedFruit.push([i, n]);
         } else {
             //if the next one to the right doesn't match stop checking
@@ -1055,6 +1066,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     //move pieces
     document.addEventListener('keydown', function(e) {
+        if (gameState === 'paused') { return; }
         if (e.key === 'ArrowLeft') {
             //left
             let dX = -50;

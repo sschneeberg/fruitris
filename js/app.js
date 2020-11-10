@@ -811,7 +811,7 @@ function rePaint() {
         } else if (player2.won) {
             document.getElementById('winner').innerText = `${player2.name} WINS: ${player2.score} PTS`;
         } else {
-            document.getElementById('winner').innerText = `YOU LOST: ${player1.score} PTS`;
+            document.getElementById('winner').innerText = `GAME OVER: ${player1.score} PTS`;
         }
         document.getElementById('endScreen').classList.toggle('hide');
         document.querySelector('.player-info').classList.toggle('hide');

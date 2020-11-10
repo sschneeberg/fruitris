@@ -3,7 +3,7 @@ SEI 1019 Project 1: Fruitris
 
 A Tetris like puzzle game inspired by Gadgadsgame from neopets.com
 
-To play Fruitris online visit sschneeberg.github.io
+To play Fruitris online visit [sschneeberg.github.io](sschneeberg.github.io)
 
 # HOW TO PLAY
 

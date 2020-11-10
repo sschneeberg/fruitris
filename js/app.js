@@ -63,6 +63,7 @@ class Player {
         this.turn = false;
         this.won = false;
         this.highScore = 5000;
+        this.mode = null;
         this.powerups = {
             row: { number: 0, url: 'imgs/row.png', y: 10 }, //clears a row
             column: { number: 0, url: 'imgs/column.png', y: 70 }, //clears column
@@ -86,6 +87,7 @@ class Player {
     }
 
     checkScore() {
+        if (gameMode === 2) { return; }
         if (this.highScore !== null && this.score >= this.highScore) {
             fruitGroup = [];
             gameOver = true;
@@ -658,6 +660,15 @@ function resetGame(e) {
         board = Array(12).fill().map(() => Array(9).fill(0));
         player1.clrScore();
         player2.clrScore();
+        if (gameMode === 1) {
+            if (player1.mode === 'easy') {
+                player1.highScore = 5000;
+            } else if (player1.mode === 'medium') {
+                player1.highScore = 10000;
+            } else if (player1.mode === 'hard') {
+                player1.highScore = 15000;
+            }
+        }
         startGame();
     } else if (gameMode === 1) {
         if (gameState === 'paused') {
@@ -706,7 +717,7 @@ function startGame() {
 
         document.getElementById('turnChanger').style.opacity = 1;
         setTimeout(function() {
-            document.getElementById('turnDisp').innerText = `Score to beat: ${player1.highScore}`;
+            document.getElementById('turnDisp').innerText = `SCORE TO BEAT: ${player1.highScore} PTS`;
         }, 1000)
         setTimeout(function() {
             document.getElementById('turnChanger').style.opacity = 0;
@@ -792,13 +803,13 @@ function rePaint() {
         gameState = 'deactive';
         if (player1.won) {
             if (gameMode === 1) {
-                document.getElementById('winner').innerText = `WINNER: ${player1.score} pts`;
+                document.getElementById('winner').innerText = `WINNER: ${player1.score} PTS`;
                 document.getElementById('continue').classList.toggle('hide');
             } else {
-                document.getElementById('winner').innerText = `${player1.name} wins: ${player1.score} pts`;
+                document.getElementById('winner').innerText = `${player1.name} WINS: ${player1.score} PTS`;
             }
         } else if (player2.won) {
-            document.getElementById('winner').innerText = `${player2.name} wins: ${player2.score} PTS`;
+            document.getElementById('winner').innerText = `${player2.name} WINS: ${player2.score} PTS`;
         } else {
             document.getElementById('winner').innerText = `YOU LOST: ${player1.score} PTS`;
         }
@@ -841,16 +852,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('medium').classList.remove('selected');
                 document.getElementById('hard').classList.remove('selected');
                 player1.highScore = 5000;
+                player1.mode = 'easy'
             } else if (e.target.id === 'medium') {
                 e.target.classList.add('selected');
                 document.getElementById('easy').classList.remove('selected');
                 document.getElementById('hard').classList.remove('selected');
                 player1.highScore = 10000;
+                player1.mode = 'medium'
             } else if (e.target.id === 'hard') {
                 e.target.classList.add('selected');
                 document.getElementById('medium').classList.remove('selected');
                 document.getElementById('easy').classList.remove('selected');
                 player1.highScore = 15000;
+                player1.mode = 'hard';
             }
         });
     });
@@ -878,10 +892,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('rechoose').addEventListener('click', mainMenu);
     document.getElementById('continue').addEventListener('click', function() {
         document.getElementById('endScreen').classList.toggle('hide');
+        document.getElementById('continue').classList.toggle('hide');
         document.querySelector('.player-info').classList.toggle('hide');
         toggleButtons();
         gameState = 'active';
         gameOver = false;
+        player1.won = false;
         player1.highScore = null;
         drawFruitGroup();
     })

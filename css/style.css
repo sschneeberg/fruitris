@@ -26,6 +26,8 @@ header {
     justify-content: space-between;
     margin: 0 2rem 0 2rem;
     font-family: 'Londrina Sketch', cursive;
+    letter-spacing: 4px;
+    background-position: rgba(3, 82, 3, 0.233);
 }
 
 #title {

@@ -404,8 +404,11 @@ function fruitFall() {
                 board[i][j] = board[i - 1][j];
                 board[i][j].y = board[i][j].y + (2 * board[i][j].r);
                 board[i - 1][j] = 0;
-                checkHorizMatch(i, j, board[i][j]);
-                checkVertMatch(i, j, board[i][j]);
+                if (i === board.length - 1 || board[i + 1][j] !== 0) {
+                    //do not match mid fall
+                    checkHorizMatch(i, j, board[i][j]);
+                    checkVertMatch(i, j, board[i][j]);
+                }
             } //otherwise do nothing, the fruit stays put
         }
     }
@@ -671,6 +674,12 @@ function resetGame(e) {
         player2.clrScore();
         startGame();
     } else if (gameMode === 1) {
+        if (gameState === 'paused') {
+            document.getElementById('pause').innerText = 'PAUSE';
+            gameState = 'active';
+            movementSpeed = 200;
+            movePiece = setInterval(dropFruitGroup, (movementSpeed * movementMultiplier));
+        }
         board = Array(12).fill().map(() => Array(9).fill(0));
         player1.clrScore();
         drawFruitGroup();

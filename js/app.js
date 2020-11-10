@@ -691,9 +691,11 @@ function startGame() {
     gameOver = false;
     gameState = 'active';
     player1.name = document.getElementById('player1').value;
+    player1.name = player1.name.toUpperCase();
     player1.turn = true;
     if (gameMode === 2) { //turn off p2 menu items, turn on p2 game items
         player2.name = document.getElementById('player2').value;
+        player2.name = player2.name.toUpperCase();
         document.querySelectorAll('.p2').forEach(function(e) {
             e.classList.toggle('hide');
         })
